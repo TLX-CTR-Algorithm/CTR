@@ -3,15 +3,12 @@ import numpy as np
 import scipy as sc
 import sys
 import utils
+import config
 import xgboost as xgb
-from sklearn import preprocessing
-from sklearn.preprocessing import LabelEncoder
-
 
 	
-#reading training,test
-train_data0 = pd.read_csv(utils.raw_data_path + "train.csv")
-test_data = pd.read_csv(utils.raw_data_path + "test.csv")
+train_data0 = pd.read_csv(config.train_path)
+test_data = pd.read_csv(config.test_path)
 
 train_data0['tr_or_te'] = 'tr'
 test_data['tr_or_te'] = 'te'
