@@ -4,14 +4,15 @@ import scipy as sc
 import sys
 import utils
 import xgboost as xgb
+import config
 
-nrow = 20000 #训练集，测试集抽取数据条数
 	
 #reading training,test
 train_data0 = pd.read_csv(utils.raw_data_path + "train.csv")
 test_data = pd.read_csv(utils.raw_data_path + "test.csv")
 data_dir = utils.raw_data_path
-outdir = ?
+outdir = config.outdir
+
 
 categorial_features = rane(1,27) #26维分类型变量
 
