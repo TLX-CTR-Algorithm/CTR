@@ -14,7 +14,7 @@ data_dir = utils.raw_data_path
 outdir = config.outdir
 
 
-categorial_features = rane(1,27) #26维分类型变量
+categorial_features = range(1,27) #26维分类型变量
 
 #对训练集，预测集混合，挑选并新建特征，完成后分离保存
 utils.create_feature(train_path,test_path,datadir = data_dir ,nrow = nrow)

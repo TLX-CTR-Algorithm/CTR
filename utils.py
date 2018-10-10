@@ -31,29 +31,41 @@ def to_weekday(date):
     week = datetime.datetime.strptime(str(date // 100),'%y%m%d').strftime('%a')
     return week
 
-	
+#数据下采样
+def down_sampling(tr_data,label):
+    temp_0=tr_data[label]== 0
+    data_0=tr_data[temp_0] 
+    temp_1=tr_data[label]==1
+    data_1=tr_data[temp_1] 
+    data_0_ed=data_0[0:len(data_1)]
+    data_downsampled=pd.concat([data_1,data_0_ed])
+    return data_downsampled
+
 #对训练集，预测集新建特征
-def create_feature(train_path,test_path ,datadir,nrow = None):
+def create_feature(train_path,test_path ,datadir,dn_sample = True):
     
-    if not nrow:
-        train_data0 = pd.read_csv(train_path + 'train.csv')
-        test_data = pd.read_csv(test_path + 'test.csv')
+    if dn_sample:
+        train_df = pd.read_csv(train_path + 'train.csv')
+        train_df = down_sampling(tr_data = train_df,label = 'click') #数据下采样
+
+        test_df = pd.read_csv(test_path + 'test.csv')
     else:
-        train_data0 = pd.read_csv(train_path + 'train.csv',nrows = nrow)
-        test_data = pd.read_csv(test_path + 'test.csv',nrows = nrow)
+        nrow = 4000000
+        train_df = pd.read_csv(train_path + 'train.csv',nrows = nrow)
+        test_df = pd.read_csv(test_path + 'test.csv',nrows = nrow)
 
-    test_data['click'] = 0 
 
-    train_data = pd.concat([train_data0, test_data],ignore_index=True)
+    test_df['click'] = 0 
+
+    train_data = pd.concat([train_df, test_df],ignore_index=True)
 
     print("finished loading raw data, ", train_data.shape)
     train_data['day']=np.round(train_data.hour % 10000 / 100).astype('int') #生成日期，某天
-    train_data['hour_n'] = np.round(train_data.hour % 100)
+    train_data['hour_n'] = np.round(train_data.hour % 100) #抽取单位时
     train_data['weekday'] = list(map(to_weekday,train_data.hour))[0]
-    train_data['app_or_web'] = 0
+    train_data['app_or_web'] = 0 #生成app，web识别特征
     train_data.ix[train_data.app_id.values=='ecad2386', 'app_or_web'] = 1
-    train_data['C15_C16'] = np.add(train_data.C15.map(str),train_data.C16.map(str))
-    train_data = train_data.drop(['id','hour'],axis = 1)
+    train_data['C15_C16'] = np.add(train_data.C15.map(str),train_data.C16.map(str)) #组合图形尺寸
     print("finished creating feature, ", train_data.shape)
 
     vn_list = ['click','C1', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20', 'C21',
@@ -61,16 +73,15 @@ def create_feature(train_path,test_path ,datadir,nrow = None):
             'device_id','device_ip', 'device_model','device_type', 'site_category', 
             'site_domain', 'site_id', 'day','hour_n', 'weekday', 'app_or_web', 'C15_C16']
 
-    train_data2 = train_data.loc[:len(train_data0),vn_list]
-    test_data2 = train_data.loc[len(train_data0):,vn_list]
+    train_data2 = train_data.loc[:len(train_df),vn_list]
+    test_data2 = train_data.loc[len(train_df):,vn_list].drop('click',axis = 1)
 
     train_data2.to_csv(datadir + 'fe_add_train_data.csv',index = None,header = 0)
     test_data2.to_csv(datadir + 'fe_add_test_data.csv',index = None,header = 0)
     print("finished exporting train_data/test_data after increasing features")
 
-	
-	
-	
+
+
 # 分类型变量生成 
 #cutoff 超参数，利用cutoff对特征的特征值计数进行处理，低于该值都归为一类
 class CategoryDictGenerator:
