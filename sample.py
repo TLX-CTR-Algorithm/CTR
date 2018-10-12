@@ -94,7 +94,7 @@ def gendata(is_training=True):
         train_num_data, train_obj_data, train_data_label = splitdata(train_data)
         # 数字化编码
         train_encodata = objnumeric(train_obj_data)
-        analyze(train_encodata=train_encodata)
+        # analyze(train_encodata=train_encodata)
         train_data = np.concatenate((np.array(train_num_data, dtype=np.int64), train_encodata), axis=1)
         train_lable = np.array(train_data_label, dtype=np.int64)
         # analyze(train_data=train_data)
