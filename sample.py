@@ -32,7 +32,7 @@ def analyze( **kwargs ):
 
             # logging.debug层级日志会输出需要分析的数据的各个特性,可以注释掉不需要的属性
             logging.debug('\n{0}.shape: \n{1}'.format(key,data.shape))
-            logging.debug('\n{0}.value: \n{1}'.format(key, data))
+            #logging.debug('\n{0}.value: \n{1}'.format(key, data))
             logging.debug('\n{0}.head: \n{1}'.format(key,data.head(5)))
             #logging.debug('\n{0}.info: \n{1}'.format(key, data.info()))
             #数据中没有空值
@@ -46,13 +46,16 @@ def analyze( **kwargs ):
             logging.debug('\n{0}.value: \n{1}'.format(key, data[0:2]))
 
 def splitdata(data,is_train=True):
-    num_data = data[config.keyofnum]
-    object_data = data[config.keyofobject]
+    #num_data = data[config.keyofnum]
+    #object_data = data[config.keyofobject]
+    feature_data = data.drop(config.keyoflable,axis=1).astype(str)
     if is_train:
         label_data = data[config.keyoflable]
-        return num_data, object_data, label_data
+        #return num_data, object_data, label_data
+        return feature_data, label_data
     else:
-        return num_data, object_data
+        #return num_data, object_data
+        return feature_data
 
 def objnumeric(data):
     #axes=data.axes
@@ -73,6 +76,7 @@ def objnumeric(data):
 
     encoder = LabelEncoder()
     encoder.fit(np.unique(data.values))
+    analyze(uniquevale=np.unique(data.values))
     encoderdata = data.apply(encoder.transform)
 
     return encoderdata
@@ -91,11 +95,15 @@ def gendata(is_training=True):
     if is_training:
         train_data = pd.read_csv(config.train_path)
         # 数据拆分
-        train_num_data, train_obj_data, train_data_label = splitdata(train_data)
+        #train_num_data, train_obj_data, train_data_label = splitdata(train_data)
+        train_feature_data, train_data_label = splitdata(train_data)
+
+        analyze(train_feature_data=train_feature_data)
         # 数字化编码
-        train_encodata = objnumeric(train_obj_data)
+        #train_encodata = objnumeric(train_obj_data)
         # analyze(train_encodata=train_encodata)
-        train_data = np.concatenate((np.array(train_num_data, dtype=np.int64), train_encodata), axis=1)
+        #train_data = np.concatenate((np.array(train_num_data, dtype=np.int64), train_encodata), axis=1)
+        train_data = objnumeric(train_feature_data)
         train_lable = np.array(train_data_label, dtype=np.int64)
         # analyze(train_data=train_data)
         return train_data, train_lable
