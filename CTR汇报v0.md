@@ -412,7 +412,9 @@ C15、C16结合起来分析，猜测可能为设备的显示尺寸，考虑将�
 
 ## 2 模型结构
 
-![structure diagram](C:\Users\ASUS\Desktop\structure diagram.png)
+
+
+![structure diagram](https://github.com/TLX-CTR-Algorithm/CTR/blob/barnett007/structure%20diagram.png)
 
 本次作业考虑利用FFM模型和FCN组合来对点击率进行预测，主要分为两个部分：
 
