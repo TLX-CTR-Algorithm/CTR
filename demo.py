@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 import sample
+import config
 
 ids = tf.Variable([[10,20,30],
                    [40,50,60],
@@ -47,7 +48,9 @@ output = pddata.apply(le.transform)
 
 #ndarray test
 arr = np.array(pddata)
-print (arr)
-print (len(arr))
+#print (arr)
+#print (len(arr))
 
-
+embed_matrix = tf.Variable(tf.random_uniform([config.embed_max, config.embed_dim], -1, 1), name="embed_matrix")
+print (embed_matrix.shape)
+print (embed_matrix.eval)
