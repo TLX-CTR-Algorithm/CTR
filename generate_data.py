@@ -11,11 +11,18 @@ import random
 train_path = '/data/barnett007/ctr-data/'
 test_path = '/data/barnett007/ctr-data/'
 
-data_dir = '/data/barnett007/ctr-data/'
+data_dir = '/output'
 outdir = '/output'
 
-categorial_features = range(1, 27)
+continous_features = range(1, 5)
+categorial_features = range(5, 31)
+continous_clip = [1740, 6, 2, 2] #待调整
 
-utils.create_feature(train_path,test_path,datadir = data_dir ,nrow = 20000)
-utils.preprocess(data_dir,outdir = outdir,categorial_features=categorial_features)
+utils.create_feature(data_path=train_path, datadir=data_dir,
+                     filename='train.csv')
+utils.create_feature(data_path=train_path, datadir=data_dir,
+                     filename='test.csv')
 
+utils.preprocess(datadir=data_dir, outdir=outdir,
+                 continous_features=continous_features,
+                 categorial_features=categorial_features)
