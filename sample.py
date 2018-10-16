@@ -34,12 +34,7 @@ def analyze( **kwargs ):
             logging.debug('\n{0}.shape: \n{1}'.format(key,data.shape))
             #logging.debug('\n{0}.value: \n{1}'.format(key, data))
             logging.debug('\n{0}.head: \n{1}'.format(key,data.head(5)))
-            #logging.debug('\n{0}.info: \n{1}'.format(key, data.info()))
-            #数据中没有空值
-            #logging.debug('\n{0}.isnullsum: \n{1}'.format(key, data.isnull().sum()))
-            #logging.debug('\n{0}.describe: \n{1}'.format(key, data.describe()))
 
-            #analyze_detail(data)
         if data.__class__.__name__ == 'ndarray':
             #np.set_printoptions(threshold=1000000)
             logging.debug('\n{0}.shape: \n{1}'.format(key, data.shape))
@@ -58,22 +53,6 @@ def splitdata(data,is_train=True):
         return feature_data
 
 def objnumeric(data):
-    #axes=data.axes
-    #logging.debug(data.axes)
-    #logging.debug(axes[1])
-    #logging.debug('encoderdata.shape:{}'.format(encoderdata.shape))
-    #encoderdata = np.zeros_like(data, dtype=np.int64)
-    #for indx,obdata in enumerate(data.axes[1]):
-        #logging.debug('title:{}'.format(obdata))
-        #logging.debug('class:{}'.format(data[obdata].__class__.__name__))
-     #   encoder = LabelEncoder()
-     #   encoderunits = encoder.fit_transform(data[obdata])
-     #   encoderdata[:, indx] = encoderunits
-        #logging.debug('encoderunits:{}'.format(encoderunits))
-        #logging.debug('encoderunits:{}'.format(encoderunits.shape))
-        #logging.debug('indx:{}'.format(indx))
-        #logging.debug('encoderdata:{}'.format(encoderdata))
-
     encoder = LabelEncoder()
     encoder.fit(np.unique(data.values))
     analyze(uniquevale=np.unique(data.values))
@@ -120,13 +99,6 @@ def gendata(is_training=True):
 
 if __name__ == '__main__':
     gendata()
-
-    #train_data_batch = genbatch(train_data, train_lable, batch_size=batch_size)
-    #test_data_batch = genbatch(test_data, batch_size=batch_size)
-
-    #train_batch_data, train_batch_label = next(train_data_batch)
-    #test_batch_data = next(test_data_batch)
-    #analyze(train_batch_data=train_batch_data, train_batch_label=train_batch_label, test_batch_data=test_batch_data)
 
 
 
