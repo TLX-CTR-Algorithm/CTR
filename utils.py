@@ -20,6 +20,24 @@ def en_dummy(data, cate_vn_list):
     result = pd.DataFrame(data)
     return result
 
+def one_hot_representation(sample, fields_dict, array_length):
+    """
+    One hot presentation for every sample data
+    :param fields_dict: fields value to array index
+    :param sample: sample data, type of pd.series
+    :param array_length: length of one-hot representation
+    :return: one-hot representation, type of np.array
+    """
+    array = np.zeros([array_length])
+    for field in fields_dict:
+        # get index of array
+        if field == 'hour':
+            field_value = int(str(sample[field])[-2:])
+        else:
+            field_value = sample[field]
+        ind = fields_dict[field][field_value]
+        array[ind] = 1
+    return array
 
 
 
