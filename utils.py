@@ -10,6 +10,7 @@ import sys
 import random
 import hashlib
 import csv
+import config
 
 
 continous_features = range(1, 5)
@@ -105,10 +106,10 @@ def create_feature(data_path, datadir, filename = None):
     data_path:采样后数据位置
     datadir:生成数据存储位置
     '''
-    if filename == 'train.csv':
+    if filename == config.trainfilename:
             data_df = pd.read_csv(data_path + filename)
     else:
-        filename = 'test.csv'
+        filename = config.testfilename
         data_df = pd.read_csv(data_path + filename)
     print("finished loading raw data, ", filename, data_df.shape)
 
@@ -143,7 +144,7 @@ def create_feature(data_path, datadir, filename = None):
                'hour_n', 'weekday', 'app_or_web', 'C15_C16', 'pub_id',
                'pub_domain', 'pub_category']
 
-    if filename == 'train.csv':
+    if filename == config.trainfilename:
         data_df = data_df.loc[:,vn_list]
         data_df.to_csv(datadir + 'fe_add_train_data.csv',index = None,header = 0)
         print('fe_add_train_data.csv is in ' + datadir)

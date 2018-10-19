@@ -7,22 +7,30 @@ import datetime
 import collections
 import os
 import random
+import config
 
-train_path = './data/'
-test_path = './data/'
+train_path = config.train_data_dir + '/'
+test_path = config.test_data_dir + '/'
 
-data_dir = './data/'
-outdir = './output'
+data_dir = config.data_dir + '/'
+outdir = config.output_dir
 
-continous_features = range(1, 5)
-categorial_features = range(5, 31)
-continous_clip = [1740, 6, 2, 2] #待调整
+trainfilename = config.trainfilename
+testfilename = config.testfilename
+
+continous_features = config.continous_features
+categorial_features = config.categorial_features
+continous_clip = config.continous_clip
 
 utils.create_feature(data_path=train_path, datadir=data_dir,
-                     filename='train.csv')
+                     filename=trainfilename)
 utils.create_feature(data_path=train_path, datadir=data_dir,
-                     filename='test.csv')
+                     filename=testfilename)
 
-utils.preprocess(datadir=data_dir, outdir=outdir,
+dict_sizes=utils.preprocess(datadir=data_dir, outdir=outdir,
                  continous_features=continous_features,
                  categorial_features=categorial_features)
+
+print (dict_sizes)
+pddict_sizes = pd.DataFrame(dict_sizes)
+pddict_sizes.to_csv(outdir + '/dictsize.csv',encoding = 'gbk')
