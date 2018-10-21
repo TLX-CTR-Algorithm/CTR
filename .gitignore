@@ -2,3 +2,6 @@
 .idea/*
 __pycache__
 data/*
+output/*
+model_output/*
+log/*

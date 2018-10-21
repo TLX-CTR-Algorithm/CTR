@@ -2,7 +2,8 @@ import config
 import logging
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler
+import sys
 
 #日志配置
 logging.basicConfig(level=logging.DEBUG,
@@ -11,7 +12,6 @@ logging.basicConfig(level=logging.DEBUG,
                     )
 
 def analyze_detail(data):
-    #categorical_features = data.select_dtypes(include=["object"]).columns
     categorical_features = data.select_dtypes(include=["int64"]).columns
     for col in categorical_features:
         logging.debug('\n{0}属性的不同取值和出现的次数: \n{1}'.format(col,data[col].value_counts()))
@@ -20,7 +20,6 @@ def analyze( **kwargs ):
 
     datadict={}
     datadict.update(kwargs)
-    #logging.debug('params:{}'.format(params))
 
     for key in datadict:
         data=datadict[key]
@@ -34,52 +33,44 @@ def analyze( **kwargs ):
             logging.debug('\n{0}.shape: \n{1}'.format(key,data.shape))
             #logging.debug('\n{0}.value: \n{1}'.format(key, data))
             logging.debug('\n{0}.head: \n{1}'.format(key,data.head(5)))
-            #logging.debug('\n{0}.info: \n{1}'.format(key, data.info()))
-            #数据中没有空值
-            #logging.debug('\n{0}.isnullsum: \n{1}'.format(key, data.isnull().sum()))
-            #logging.debug('\n{0}.describe: \n{1}'.format(key, data.describe()))
 
-            #analyze_detail(data)
         if data.__class__.__name__ == 'ndarray':
             #np.set_printoptions(threshold=1000000)
             logging.debug('\n{0}.shape: \n{1}'.format(key, data.shape))
             logging.debug('\n{0}.value: \n{1}'.format(key, data[0:2]))
 
-def splitdata(data,is_train=True):
-    #num_data = data[config.keyofnum]
-    #object_data = data[config.keyofobject]
-    feature_data = data.drop(config.keyoflable,axis=1).astype(str)
-    if is_train:
-        label_data = data[config.keyoflable]
-        #return num_data, object_data, label_data
-        return feature_data, label_data
-    else:
-        #return num_data, object_data
-        return feature_data
 
-def objnumeric(data):
-    #axes=data.axes
-    #logging.debug(data.axes)
-    #logging.debug(axes[1])
-    #logging.debug('encoderdata.shape:{}'.format(encoderdata.shape))
-    #encoderdata = np.zeros_like(data, dtype=np.int64)
-    #for indx,obdata in enumerate(data.axes[1]):
-        #logging.debug('title:{}'.format(obdata))
-        #logging.debug('class:{}'.format(data[obdata].__class__.__name__))
-     #   encoder = LabelEncoder()
-     #   encoderunits = encoder.fit_transform(data[obdata])
-     #   encoderdata[:, indx] = encoderunits
-        #logging.debug('encoderunits:{}'.format(encoderunits))
-        #logging.debug('encoderunits:{}'.format(encoderunits.shape))
-        #logging.debug('indx:{}'.format(indx))
-        #logging.debug('encoderdata:{}'.format(encoderdata))
-
-    encoder = LabelEncoder()
-    encoder.fit(np.unique(data.values))
-    analyze(uniquevale=np.unique(data.values))
-    encoderdata = data.apply(encoder.transform)
+def standard(data):
+    encoder = StandardScaler()
+    #encoder.fit(np.unique(data.values))
+    #analyze(uniquevale=np.unique(data.values))
+    #encoderdata = data.apply(encoder.transform)
+    encoderdata = encoder.fit_transform(data)
 
     return encoderdata
+
+def splitfealabdata(data,flag='train'):
+    feature_data = data[:,0:-1]
+    if flag == 'train'or flag == 'valid':
+        label_data = data[:,-1]
+        return feature_data, label_data
+    elif flag == 'test':
+        return feature_data
+    else:
+        logging.error('arguments of function splitdata must be train,test or valid')
+        sys.exit()
+
+def splitdata(data,flag='train'):
+    continous_data = data[:, 0:config.encod_cat_index_begin]
+    categorial_data = data[:,config.encod_cat_index_begin:config.encod_cat_index_end]
+    if flag == 'train'or flag == 'valid':
+        label_data = data[:,-1]
+        return continous_data,categorial_data, label_data
+    elif flag == 'test':
+        return continous_data,categorial_data
+    else:
+        logging.error('arguments of function splitdata must be train,test or valid')
+        sys.exit()
 
 def genbatch(feature_data,label_data=None,batch_size=200):
     for start in range(0, len(feature_data), batch_size):
@@ -90,44 +81,34 @@ def genbatch(feature_data,label_data=None,batch_size=200):
             yield feature_data[start:end], label_data[start:end]
 
 #获取数据,视需求可调用其中的数据分析功能
-def gendata(is_training=True):
+def gendata(flag='train'):
 
-    if is_training:
-        train_data = pd.read_csv(config.train_path)
+    if flag == 'train':
+        train_data = np.loadtxt(config.encod_train_path,delimiter=',')
         # 数据拆分
-        #train_num_data, train_obj_data, train_data_label = splitdata(train_data)
-        train_feature_data, train_data_label = splitdata(train_data)
-
-        analyze(train_feature_data=train_feature_data)
-        # 数字化编码
-        #train_encodata = objnumeric(train_obj_data)
-        # analyze(train_encodata=train_encodata)
-        #train_data = np.concatenate((np.array(train_num_data, dtype=np.int64), train_encodata), axis=1)
-        train_data = objnumeric(train_feature_data)
-        train_lable = np.array(train_data_label, dtype=np.int64)
-        # analyze(train_data=train_data)
-        return train_data, train_lable
+        train_continous_data, train_categorial_data, train_data_label = splitdata(train_data)
+        train_continous_standard_data = standard(train_continous_data)
+        train_feature_data = np.concatenate([train_continous_standard_data,train_categorial_data],axis=1)
+        return train_feature_data, train_data_label
+    elif flag == 'valid':
+        valid_data = np.loadtxt(config.encod_vaild_path,delimiter=',')
+        valid_continous_data, valid_categorial_data, valid_data_label = splitdata(valid_data, flag='valid')
+        valid_continous_standard_data = standard(valid_continous_data)
+        valid_feature_data = np.concatenate([valid_continous_standard_data, valid_categorial_data], axis=1)
+        return valid_feature_data, valid_data_label
+    elif flag == 'test':
+        test_data = np.loadtxt(config.encod_test_path,delimiter=',')
+        test_continous_data, test_categorial_data = splitdata(test_data, flag='valid')
+        test_continous_standard_data = standard(test_continous_data)
+        test_feature_data = np.concatenate([test_continous_standard_data, test_categorial_data], axis=1)
+        return test_feature_data
     else:
-        test_data = pd.read_csv(config.test_path)
-        # 数据拆分
-        test_num_data, test_obj_data = splitdata(test_data,is_train=False)
-        # 数字化编码
-        test_encodata  = objnumeric(test_obj_data)
-        #analyze(train_num_data=train_num_data)
-        test_data  = np.concatenate((np.array(test_num_data, dtype=np.int64), test_encodata), axis=1)
-        #analyze(test_data=test_data)
-        return test_data
+        logging.error('arguments of function gendata must be train,test or valid')
+        sys.exit()
 
 if __name__ == '__main__':
-    gendata()
-
-    #train_data_batch = genbatch(train_data, train_lable, batch_size=batch_size)
-    #test_data_batch = genbatch(test_data, batch_size=batch_size)
-
-    #train_batch_data, train_batch_label = next(train_data_batch)
-    #test_batch_data = next(test_data_batch)
-    #analyze(train_batch_data=train_batch_data, train_batch_label=train_batch_label, test_batch_data=test_batch_data)
-
+    train_data, train_lable = gendata()
+    analyze(train_data=train_data)
 
 
 
