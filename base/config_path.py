@@ -1,4 +1,4 @@
-import os
+
 
 train_path = '/data/barnett007/ctr-data/'
 test_path = '/data/barnett007/ctr-data/'
