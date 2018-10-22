@@ -367,7 +367,7 @@ def preprocess(datadir, outdir, continous_features, categorial_features):  # 预
     test_lgb = open(os.path.join(outdir, 'test_lgb.txt'), 'w')
 
     with open(os.path.join(outdir, 'test.txt'), 'w') as out:  # 同样编码的新预测集
-        with open(os.path.join(datadir, 'fe_add_test_data.csv'), 'r') as f:  # ？真预测集
+        with open(os.path.join(datadir, 'fe_add_test_data.csv'), 'r') as f:  #真预测集
             for line in f:
                 features = line.rstrip('\n').split(',')
 
