@@ -236,7 +236,7 @@ def preprocess(datadir, outdir, continous_features, categorial_features):#预处
 
     dicts = CategoryDictGenerator(len(categorial_features))
     dicts.build(
-        os.path.join(datadir, 'fe_add_train_data.csv'), categorial_features, cutoff=5)#200 50
+        os.path.join(datadir, 'fe_add_train_data.csv'), categorial_features, cutoff=config.cutoff)#200 50
 
     dict_sizes = dicts.dicts_sizes()#每个特征符合条件的特征值个数列表，长度等于分类型特征个数
     categorial_feature_offset = [0]

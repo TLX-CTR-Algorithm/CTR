@@ -3,7 +3,7 @@ import tensorflow as tf
 import model2
 import config
 import logging
-import sample
+import dnn_utils
 import pandas as pd
 import os
 import numpy as np
@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.DEBUG,
 #模型训练函数
 def train_model(batch_size=config.batch_size):
     #获取训练数据
-    inputs, lables = sample.gendata(flag='train')
+    inputs, lables = dnn_utils.gendata(flag='train')
     categorial_data = inputs[:,config.encod_cat_index_begin:config.encod_cat_index_end]
     logging.debug('oridata_dim:{}'.format(categorial_data.shape[1]))
     dictsizes = pd.read_csv(config.dictsizefile)
@@ -30,7 +30,7 @@ def train_model(batch_size=config.batch_size):
     logging.debug('embed_max:{}'.format(embed_max))
 
     #获取校验数据
-    valid_inputs,valid_labels = sample.gendata(flag='valid')
+    valid_inputs,valid_labels = dnn_utils.gendata(flag='valid')
 
     #构建网络模型
     dnnmodel = model2.Model(learning_rate=config.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max )
@@ -59,7 +59,7 @@ def train_model(batch_size=config.batch_size):
         epoch=0
         while 1 == 1:
             # 使用训练数据进行模型训练
-            batches = sample.genbatch(inputs, lables, batch_size=config.batch_size)
+            batches = dnn_utils.genbatch(inputs, lables, batch_size=config.batch_size)
             #logging.info('epoch:{}'.format(epoch))
             for step in range(len(inputs) // batch_size):
                 batch_inputs,batch_lables = next(batches)
@@ -78,7 +78,7 @@ def train_model(batch_size=config.batch_size):
 
             logging.info('----------------------valid-----------------------')
             #使用验证数据，验证模型性能
-            valid_batches = sample.genbatch(valid_inputs, valid_labels, batch_size=config.batch_size)
+            valid_batches = dnn_utils.genbatch(valid_inputs, valid_labels, batch_size=config.batch_size)
             for step in range(len(valid_inputs) // batch_size):
                 batch_valid_inputs,batch_valid_lables = next(valid_batches)
                 valid_continous_inputs = batch_valid_inputs[:, 0:config.encod_cat_index_begin]
