@@ -19,11 +19,11 @@ print(test_path)
 
 # 深度网络相关配置
 # 路径和文件配置
-encod_train_path = os.path.join(BASE_DIR, "output/train.txt")
-encod_vaild_path = os.path.join(BASE_DIR, "output/valid.txt")
-encod_test_path = os.path.join(BASE_DIR, "output/test.txt")
-dictsizefile = os.path.join(BASE_DIR, "output/dictsize.csv")
-model_ouput_dir = os.path.join(BASE_DIR, "model_output/")
+encod_train_path = os.path.join(BASE_DIR, "output/model_data/train.txt")
+encod_vaild_path = os.path.join(BASE_DIR, "output/model_data/valid.txt")
+encod_test_path = os.path.join(BASE_DIR, "output/model_data/test.txt")
+dictsizefile = os.path.join(BASE_DIR, "output/model_data/dictsize.csv")
+model_ouput_dir = os.path.join(BASE_DIR, "/DNN/model_output/")
 summary_dir = os.path.join(BASE_DIR, "summary/")
 encod_cat_index_begin = 4
 encod_cat_index_end = 30

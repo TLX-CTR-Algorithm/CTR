@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn import preprocessing
 import numpy as np
 import pickle
@@ -10,6 +11,8 @@ import sys
 import random
 import hashlib
 import csv
+import logging
+import config
 
 
 def en_dummy(data, cate_vn_list):
@@ -145,6 +148,12 @@ def scan(path):
         user_hour_cnt[user + '-' + row['hour']] += 1  # 组合具体人与时间，反映具体人的活动时间分布
     return id_cnt, ip_cnt, user_cnt, user_hour_cnt
 
+
+# 日志配置
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %h:%M:%S',
+                    )
 
 # 数据标准化
 def standard(data):
