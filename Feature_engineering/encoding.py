@@ -5,17 +5,10 @@ import sys
 import utils
 import config
 import xgboost as xgb
-import logging
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                    datefmt='%a, %d %b %Y %h:%M:%S',
-                    )
-
+	
 train_data0 = pd.read_csv(config.train_path)
 test_data = pd.read_csv(config.test_path)
-
-logging.debug('train.shape: '.format(train_data0.shape))
 
 train_data0['tr_or_te'] = 'tr'
 test_data['tr_or_te'] = 'te'

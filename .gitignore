@@ -1,7 +1,7 @@
 .DS_Store
 .idea/*
 __pycache__
-data/*
+avazu_CTR/*
 output/*
-model_output/*
-log/*
+DNN/log/*
+DNN/model_output/*

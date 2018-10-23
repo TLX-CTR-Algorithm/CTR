@@ -69,7 +69,7 @@ class Model():
     def build(self):
         self.continous_inputs = tf.placeholder(tf.float32, [None,4], name='continous_inputs')
         self.categorial_inputs = tf.placeholder(tf.float32, name='categorial_inputs')
-        self.label = tf.placeholder(tf.float32, name='inputs')
+        self.label = tf.placeholder(tf.float32, name='label')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
         self.global_step = tf.Variable(0, trainable=False, name='self.global_step', dtype=tf.int64)
 

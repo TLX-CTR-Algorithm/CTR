@@ -1,1 +1,41 @@
-import os'''模型的基本配置 BASE_DIR 本地路径train_path 训练路径test_path 测试路径'''BASE_DIR = os.path.dirname(os.path.abspath(__file__))#特征工程相关配置#train_path = os.path.join(BASE_DIR, "data\\train_1w.csv")#test_path = os.path.join(BASE_DIR, "data\\test_1k.csv")train_data_dir=BASE_DIR + '/data'test_data_dir=BASE_DIR + '/data'data_dir=BASE_DIR + '/data'output_dir=BASE_DIR +'/output'trainfilename='train_10w.csv'testfilename='test_1w.csv'continous_features = range(1, 5)categorial_features = range(5, 31)continous_clip = [1740, 6, 2, 2] #待调整#深度网络相关配置#keyoflable=['click']#keyofnum=['id','hour','C1','banner_pos','device_type','device_conn_type','C14','C15','C16','C17','C18','C19','C20','C21']#keyofobject=['site_id','site_domain','site_category','app_id','app_domain','app_category','device_id','device_ip','device_model']#输入数据encod_train_path=BASE_DIR + '/output/train.txt'encod_vaild_path=BASE_DIR + '/output/valid.txt'encod_test_path=BASE_DIR + 'output/test.txt'#encod_con_index = range(0,4)#encod_cat_index = range(4, 30)encod_cat_index_begin = 4encod_cat_index_end = 30dictsizefile=BASE_DIR + '/output/dictsize.csv'model_ouput_dir=BASE_DIR + '/model_output'summary_dir=BASE_DIR + '/summary'batch_size=200keep_prob=0.8logfrequency=10Max_step=20000000embed_dim=128learning_rate=0.01oridata_dim=23
+import os
+import time
+
+'''
+模型的基本配置 
+BASE_DIR 本地路径
+train_path 训练路径
+test_path 测试路径
+
+'''
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+train_path = os.path.join(BASE_DIR, "avazu_CTR/train.csv")
+test_path = os.path.join(BASE_DIR, "avazu_CTR/test.csv")
+data_path = os.path.join(BASE_DIR, "avazu_CTR/sets/")
+field2count = os.path.join(BASE_DIR, "avazu_CTR/field2count/")
+
+
+print(test_path)
+
+# 深度网络相关配置
+# 路径和文件配置
+encod_train_path = os.path.join(BASE_DIR, "output/model_data/train.txt")
+encod_vaild_path = os.path.join(BASE_DIR, "output/model_data/valid.txt")
+encod_test_path = os.path.join(BASE_DIR, "output/model_data/test.txt")
+dictsizefile = os.path.join(BASE_DIR, "output/model_data/dictsize.csv")
+model_ouput_dir = os.path.join(BASE_DIR, "DNN/model_output/")
+summary_dir = os.path.join(BASE_DIR, "DNN/summary/")
+dnn_log_file = 'train_' + time.strftime('%Y%m%d', time.localtime(time.time())) + '.log'
+dnn_log_dir = os.path.join(BASE_DIR, "DNN/log/")
+dnn_log_path = os.path.join(dnn_log_dir, dnn_log_file)
+encod_cat_index_begin = 4
+encod_cat_index_end = 30
+# 训练参数
+batch_size = 1000
+keep_prob = 0.8
+logfrequency = 10
+Max_step = 20000000
+embed_dim = 128
+learning_rate = 0.01
+oridata_dim = 23
