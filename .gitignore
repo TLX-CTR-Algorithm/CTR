@@ -1,9 +1,4 @@
 .DS_Store
 .idea/*
 __pycache__
-data/*
-output/*
-model_output/*
-log/*
-summary/*
-demo.py
+avazu_CTR/*
