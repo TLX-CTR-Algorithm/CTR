@@ -1,4 +1,5 @@
 import os
+import time
 
 '''
 模型的基本配置 
@@ -23,8 +24,11 @@ encod_train_path = os.path.join(BASE_DIR, "output/model_data/train.txt")
 encod_vaild_path = os.path.join(BASE_DIR, "output/model_data/valid.txt")
 encod_test_path = os.path.join(BASE_DIR, "output/model_data/test.txt")
 dictsizefile = os.path.join(BASE_DIR, "output/model_data/dictsize.csv")
-model_ouput_dir = os.path.join(BASE_DIR, "/DNN/model_output/")
+model_ouput_dir = os.path.join(BASE_DIR, "DNN/model_output/")
 summary_dir = os.path.join(BASE_DIR, "summary/")
+dnn_log_file = 'train_' + time.strftime('%Y%m%d', time.localtime(time.time())) + '.log'
+dnn_log_dir = os.path.join(BASE_DIR, "DNN/log/")
+dnn_log_path = os.path.join(dnn_log_dir, dnn_log_file)
 encod_cat_index_begin = 4
 encod_cat_index_end = 30
 # 训练参数

@@ -149,12 +149,6 @@ def scan(path):
     return id_cnt, ip_cnt, user_cnt, user_hour_cnt
 
 
-# 日志配置
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                    datefmt='%a, %d %b %Y %h:%M:%S',
-                    )
-
 # 数据标准化
 def standard(data):
     encoder = StandardScaler()
