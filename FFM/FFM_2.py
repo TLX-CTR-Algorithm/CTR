@@ -7,7 +7,7 @@ configure
 '''
 batch_size = 128
 learning_rate = 0.001
-data_path = './dep_norm_test_data.txt'
+data_path = './norm_test_data.txt'
 
 # no need to define,will be assigned by prepare_data function
 field_num = 0
@@ -27,10 +27,11 @@ def prepare_data(file_path=data_path):
     for sample in open(file_path, 'r'):
         sample_data = []
         field_features = sample.split()[1:]
+        #
         for field_feature_pair in field_features:
             feature = int(field_feature_pair.split(':')[1])
             field = int(field_feature_pair.split(':')[0])
-            value = float(field_feature_pair.split(':')[0])
+            value = float(field_feature_pair.split(':')[2])
             if (field + 1 > field_num):
                 field_num = field + 1
             if (feature + 1 > feature_num):
@@ -80,14 +81,13 @@ class FFM:
                                    shape=(self.batch_size),
                                    name='feature_{}'.format(idx)))
         with tf.name_scope('network'):
-
             # b0:constant bias
             # predict = b0 + sum(Vi * feature_i) + sum(Vij * Vji * feature_i * feature_j)
             self.b0 = tf.get_variable(name='bias_0', shape=[1], dtype=tf.float32)
             tf.summary.histogram('b0', self.b0)
             # calculate liner term
             self.liner_term = tf.reduce_sum(tf.multiply(tf.transpose(
-                tf.convert_to_tensor(self.feature_value),perm=[1, 0])
+                tf.convert_to_tensor(self.feature_value), perm=[1, 0])
                 , self.liner_weight))
             # calculate quadratic term
             self.qua_term = tf.get_variable(name='quad_term', shape=[1], dtype=tf.float32)
@@ -111,7 +111,6 @@ class FFM:
 
         self.sess.run(tf.global_variables_initializer())
         self.loop_step = 0
-
 
     def step(self):
         '''
