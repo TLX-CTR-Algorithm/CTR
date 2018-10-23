@@ -13,11 +13,16 @@ slim = tf.contrib.slim
 if not os.path.exists(config.dnn_log_dir):
     os.mkdir(config.dnn_log_dir)
 #设置日志打印格式
-logging.basicConfig(level=logging.DEBUG,
-                    filename=config.dnn_log_path,
-                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                    datefmt='%a, %d %b %Y %h:%M:%S',
-                    )
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+sh = logging.StreamHandler()
+sh.setFormatter(logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'))
+fl = logging.FileHandler(config.dnn_log_path)
+fl.setFormatter(logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'))
+logger.addHandler(sh)
+logger.addHandler(fl)
+#logging.basicConfig(level=logging.DEBUG,datefmt='%a, %d %b %Y %h:%M:%S',)
+
 #模型训练函数
 def train_model(batch_size=config.batch_size):
     #获取训练数据
