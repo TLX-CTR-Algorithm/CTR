@@ -211,3 +211,4 @@ def gendata(flag='train'):
     else:
         logging.error('arguments of function gendata must be train,test or valid')
         sys.exit()
+
