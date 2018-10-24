@@ -16,6 +16,7 @@ def parse_args(check=True):
     parser.add_argument('--encod_vaild_path',      type=str, default=config.encod_vaild_path)
     parser.add_argument('--encod_test_path',       type=str, default=config.encod_test_path)
     parser.add_argument('--dictsizefile',          type=str, default=config.dictsizefile)
+    parser.add_argument('--model_ouput_dir',       type=str, default=config.model_ouput_dir)
     parser.add_argument('--summary_dir',           type=str, default=config.summary_dir)
     parser.add_argument('--dnn_log_file',          type=str, default=config.dnn_log_file)
     parser.add_argument('--dnn_log_dir',           type=str, default=config.dnn_log_dir)

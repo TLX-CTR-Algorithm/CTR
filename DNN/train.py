@@ -6,6 +6,7 @@ import utils
 import pandas as pd
 import os
 import numpy as np
+import re
 from DNN import flags
 
 slim = tf.contrib.slim
@@ -30,13 +31,17 @@ def train_model(batch_size=FLAGS.batch_size):
     inputs, lables = utils.gendata(flag='train',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
     categorial_data = inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
     logging.debug('oridata_dim:{}'.format(categorial_data.shape[1]))
-    dictsizes = pd.read_csv(FLAGS.dictsizefile)
-    dictsize_list = np.array(dictsizes)
-    embed_max = sum(dictsize_list[:,1])
+
+    try:
+        dictsizes = pd.read_csv(FLAGS.dictsizefile)
+        dictsize_list = np.array(dictsizes)
+        embed_max = sum(dictsize_list[:,1])
+    except:
+        embed_max = np.max(categorial_data[-1])
     logging.debug('embed_max:{}'.format(embed_max))
 
     #获取校验数据
-    valid_inputs,valid_labels = utils.gendata(flag='valid')
+    valid_inputs,valid_labels = utils.gendata(flag='valid',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
 
     #构建网络模型
     dnnmodel = model.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim )
@@ -113,6 +118,13 @@ def train_model(batch_size=FLAGS.batch_size):
 
 if __name__ == '__main__':
     #train部分
+    #参数
+    for i in dir(FLAGS):
+        if re.match(r"_.*",i):
+            pass
+        else:
+            logging.info('{}:{}'.format(i,getattr(FLAGS,i)))
+
     train_model()
 
 
