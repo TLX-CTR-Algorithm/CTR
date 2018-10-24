@@ -5,18 +5,17 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-import config
 
 slim = tf.contrib.slim
 
 
 # 实现模型的构建以及损失函数交叉熵的计算
 class Model():
-    def __init__(self, learning_rate, oridata_dim, embed_max):
+    def __init__(self, learning_rate, oridata_dim, embed_max, embed_dim=128):
         self.learning_rate = learning_rate
         self.layers = [6, 6, 6]
         self.oridata_dim = oridata_dim
-        self.embed_dim = config.embed_dim
+        self.embed_dim = embed_dim
         self.embed_max = embed_max
         self.growth = 128
         self.outunits = 2048

@@ -1,14 +1,13 @@
 import tensorflow as tf
-import config
 
 slim = tf.contrib.slim
 
 class Model():
-    def __init__(self, learning_rate,oridata_dim,embed_max):
+    def __init__(self, learning_rate,oridata_dim,embed_max,embed_dim=128):
         self.learning_rate = learning_rate
         self.outunits = [1024, 128, 8]
         self.oridata_dim = oridata_dim
-        self.embed_dim = config.embed_dim
+        self.embed_dim = embed_dim
         self.embed_max = embed_max
 
     def embeding(self,embed_inputs):
