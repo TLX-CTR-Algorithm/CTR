@@ -21,8 +21,8 @@ def parse_args(check=True):
     parser.add_argument('--dnn_log_file',          type=str, default=config.dnn_log_file)
     parser.add_argument('--dnn_log_dir',           type=str, default=config.dnn_log_dir)
     parser.add_argument('--dnn_log_path',          type=str, default=config.dnn_log_path)
-    parser.add_argument('--encod_cat_index_begin', type=str, default=config.encod_cat_index_begin)
-    parser.add_argument('--encod_cat_index_end',   type=str, default=config.encod_cat_index_end)
+    parser.add_argument('--encod_cat_index_begin', type=int, default=config.encod_cat_index_begin)
+    parser.add_argument('--encod_cat_index_end',   type=int, default=config.encod_cat_index_end)
 
     FLAGS, unparsed = parser.parse_known_args()
     return FLAGS, unparsed
