@@ -47,7 +47,7 @@ train = pd.read_csv(config.train_path,chunksize=10000)
 test = pd.read_csv(config.test_path, chunksize=10000)
 
 for data in train:
-
+    # get fields
     click_v = set(data['click'].values)
     click = click | click_v
 
@@ -138,7 +138,7 @@ device_ip = dict()
 count = 0
 for data in train:
     C14_list = data['C14'].values
-    for k,v in Counter(C14_list).items():
+    for k, v in Counter(C14_list).items():
         if k in C14.keys():
             C14[k] += v
         else:
@@ -152,7 +152,7 @@ for data in train:
             C17[k] = v
 
     C19_list = data['C19'].values
-    for k,v in Counter(C19_list).items():
+    for k, v in Counter(C19_list).items():
         if k in C19.keys():
             C19[k] += v
         else:
