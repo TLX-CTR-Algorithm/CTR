@@ -1,6 +1,8 @@
 import tensorflow as tf
 import random
 import numpy as np
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 '''
 configure
@@ -27,7 +29,6 @@ def prepare_data(file_path=data_path):
     for sample in open(file_path, 'r'):
         sample_data = []
         field_features = sample.split()[1:]
-        #
         for field_feature_pair in field_features:
             feature = int(field_feature_pair.split(':')[1])
             field = int(field_feature_pair.split(':')[0])
@@ -97,7 +98,9 @@ class FFM:
                     W2 = tf.nn.embedding_lookup(self.field_embedding[f2], self.feature2field[f1])
                     self.qua_term += W1 * W2 * self.feature_value[f1] * self.feature_value[f2]
             self.predict = self.b0 + self.liner_term + self.qua_term
+            print(1111111)
             self.losses = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.label, logits=self.predict))
+            print(2222222)
             tf.summary.scalar('losses', self.losses)
             self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr, name='Adam')
             self.grad = self.optimizer.compute_gradients(self.losses)
