@@ -12,7 +12,8 @@ import random
 import hashlib
 import csv
 import logging
-import config
+from DNN import flags
+FLAGS, unparsed = flags.parse_args()
 
 
 def en_dummy(data, cate_vn_list):
@@ -168,9 +169,11 @@ def splitfealabdata(data,flag='train'):
         sys.exit()
 
 # 连续型数据和类别型数据拆分，默认数据最后一列数据为label
-def splitdata(data,flag='train'):
-    continous_data = data[:, 0:config.encod_cat_index_begin]
-    categorial_data = data[:,config.encod_cat_index_begin:config.encod_cat_index_end]
+def splitdata(data,flag='train',index_begin=4,index_end=30):
+    encod_cat_index_begin = index_begin
+    encod_cat_index_end = index_end
+    continous_data = data[:, 0:encod_cat_index_begin]
+    categorial_data = data[:,encod_cat_index_begin:encod_cat_index_end]
     if flag == 'train'or flag == 'valid':
         label_data = data[:,-1]
         return continous_data,categorial_data, label_data
@@ -190,24 +193,27 @@ def genbatch(feature_data,label_data=None,batch_size=200):
             yield feature_data[start:end], label_data[start:end]
 
 # 获取特征工程处理后的数据
-def gendata(flag='train'):
+def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='output/model_data/valid.txt',test_path='output/model_data/test.txt'):
+    encod_train_path = train_path
+    encod_vaild_path = vaild_path
+    encod_test_path = test_path
 
     if flag == 'train':
-        train_data = np.loadtxt(config.encod_train_path,delimiter=',')
+        train_data = np.loadtxt(encod_train_path,delimiter=',')
         # 数据拆分
-        train_continous_data, train_categorial_data, train_data_label = splitdata(train_data)
+        train_continous_data, train_categorial_data, train_data_label = splitdata(train_data,index_begin=FLAGS.encod_cat_index_begin,index_end=FLAGS.encod_cat_index_end)
         train_continous_standard_data = standard(train_continous_data)
         train_feature_data = np.concatenate([train_continous_standard_data,train_categorial_data],axis=1)
         return train_feature_data, train_data_label
     elif flag == 'valid':
-        valid_data = np.loadtxt(config.encod_vaild_path,delimiter=',')
-        valid_continous_data, valid_categorial_data, valid_data_label = splitdata(valid_data, flag='valid')
+        valid_data = np.loadtxt(encod_vaild_path,delimiter=',')
+        valid_continous_data, valid_categorial_data, valid_data_label = splitdata(valid_data, flag='valid',index_begin=FLAGS.encod_cat_index_begin,index_end=FLAGS.encod_cat_index_end)
         valid_continous_standard_data = standard(valid_continous_data)
         valid_feature_data = np.concatenate([valid_continous_standard_data, valid_categorial_data], axis=1)
         return valid_feature_data, valid_data_label
     elif flag == 'test':
-        test_data = np.loadtxt(config.encod_test_path,delimiter=',')
-        test_continous_data, test_categorial_data = splitdata(test_data, flag='valid')
+        test_data = np.loadtxt(encod_test_path,delimiter=',')
+        test_continous_data, test_categorial_data = splitdata(test_data, flag='valid',index_begin=FLAGS.encod_cat_index_begin,index_end=FLAGS.encod_cat_index_end)
         test_continous_standard_data = standard(test_continous_data)
         test_feature_data = np.concatenate([test_continous_standard_data, test_categorial_data], axis=1)
         return test_feature_data

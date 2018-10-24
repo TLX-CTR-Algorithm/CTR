@@ -27,7 +27,7 @@ logger.addHandler(fl)
 #模型训练函数
 def train_model(batch_size=FLAGS.batch_size):
     #获取训练数据
-    inputs, lables = utils.gendata(flag='train')
+    inputs, lables = utils.gendata(flag='train',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
     categorial_data = inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
     logging.debug('oridata_dim:{}'.format(categorial_data.shape[1]))
     dictsizes = pd.read_csv(FLAGS.dictsizefile)
