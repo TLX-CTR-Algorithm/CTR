@@ -7,8 +7,8 @@ class Model():
         self.learning_rate = learning_rate
         self.outunits = [1024, 128, 8]
         self.oridata_dim = oridata_dim
-        self.embed_dim = tf.cast(embed_dim,tf.int32)
-        self.embed_max = tf.cast(embed_max,tf.int32)
+        self.embed_dim = int(embed_dim)
+        self.embed_max = int(embed_max)
 
     def embeding(self,embed_inputs):
         with tf.name_scope("embedding"):
