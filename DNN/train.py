@@ -39,7 +39,7 @@ def train_model(batch_size=FLAGS.batch_size):
         dictsize_list = np.array(dictsizes)
         embed_max = sum(dictsize_list[:,1])
     except:
-        embed_max = np.max(categorial_data[-1])
+        embed_max = int(np.max(categorial_data) + 1)
     logging.debug('embed_max:{}'.format(embed_max))
 
     #获取校验数据
