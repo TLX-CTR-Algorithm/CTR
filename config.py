@@ -36,6 +36,7 @@ batch_size = 1000
 keep_prob = 0.8
 logfrequency = 10
 Max_step = 20000000
+Max_epoch = 6
 embed_dim = 128
 learning_rate = 0.01
 oridata_dim = 23

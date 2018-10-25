@@ -91,6 +91,7 @@ class Model():
         with tf.name_scope("score"):
             correct_prediction = tf.equal(tf.to_float(self.end_points['prediction'] > 0.5), self.label)
             self.accuracy = tf.reduce_mean(tf.to_float(correct_prediction), name="accuracy")
+        self.auc = tf.metrics.auc(self.label, self.end_points['prediction'])
 
         #summaries
         grad_summaries = []
