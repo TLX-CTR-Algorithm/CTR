@@ -63,11 +63,15 @@ class Model():
         prediction = slim.fully_connected(net, 1, activation_fn=tf.nn.sigmoid, scope=end_point)
         end_points[end_point] = prediction
 
+        #with open('./log/graph.log', 'w')as graph:
+        #    graph.write(str(tf.get_default_graph().as_graph_def()))
+
         return logits, end_points
 
     def build(self):
         self.continous_inputs = tf.placeholder(tf.float32, [None,4], name='continous_inputs')
-        self.categorial_inputs = tf.placeholder(tf.float32, [None,26], name='categorial_inputs')
+        #self.categorial_inputs = tf.placeholder(tf.float32, [None,26], name='categorial_inputs')
+        self.categorial_inputs = tf.placeholder(tf.float32, name='categorial_inputs')
         self.label = tf.placeholder(tf.float32, name='label')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
         self.global_step = tf.Variable(0, trainable=False, name='self.global_step', dtype=tf.int64)

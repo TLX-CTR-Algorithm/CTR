@@ -213,7 +213,7 @@ def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='ou
         return valid_feature_data, valid_data_label
     elif flag == 'test':
         test_data = np.loadtxt(encod_test_path,delimiter=',')
-        test_continous_data, test_categorial_data = splitdata(test_data, flag='valid',index_begin=FLAGS.encod_cat_index_begin,index_end=FLAGS.encod_cat_index_end)
+        test_continous_data, test_categorial_data = splitdata(test_data, flag='test',index_begin=FLAGS.encod_cat_index_begin,index_end=FLAGS.encod_cat_index_end)
         test_continous_standard_data = standard(test_continous_data)
         test_feature_data = np.concatenate([test_continous_standard_data, test_categorial_data], axis=1)
         return test_feature_data

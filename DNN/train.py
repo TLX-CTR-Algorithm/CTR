@@ -39,7 +39,7 @@ def train_model(batch_size=FLAGS.batch_size):
         dictsize_list = np.array(dictsizes)
         embed_max = sum(dictsize_list[:,1])
     except:
-        embed_max = np.max(categorial_data[-1])
+        embed_max = int(np.max(categorial_data) + 1)
     logging.debug('embed_max:{}'.format(embed_max))
 
     #获取校验数据
@@ -50,7 +50,8 @@ def train_model(batch_size=FLAGS.batch_size):
     dnnmodel.build()
 
     #如果没有checkpoint文件则需要对所有变量进行初始化
-    with tf.Session() as sess:
+    #with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+    with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
         logging.debug('Initialized')
