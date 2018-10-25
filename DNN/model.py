@@ -180,6 +180,7 @@ class Model():
         with tf.variable_scope('builddensenet'):
             self.logits, self.end_points = self.densenet(self.continous_inputs, self.categorial_inputs, dropout_keep_prob=self.keep_prob)
             self.log_loss = tf.losses.log_loss(labels=self.label, predictions=self.end_points['prediction'])
+            #self.loss = self.log_loss
             self.loss = tf.reduce_mean(self.log_loss)
 
         optimizer = tf.train.FtrlOptimizer(self.learning_rate)
@@ -189,6 +190,7 @@ class Model():
         with tf.name_scope("score"):
             correct_prediction = tf.equal(tf.to_float(self.end_points['prediction'] > 0.5), self.label)
             self.accuracy = tf.reduce_mean(tf.to_float(correct_prediction), name="accuracy")
+        self.auc = tf.metrics.auc(labels=self.label, predictions=self.end_points['prediction'])
 
         #summaries
         grad_summaries = []

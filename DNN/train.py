@@ -31,6 +31,8 @@ def train_model(batch_size=FLAGS.batch_size):
     inputs, lables = utils.gendata(flag='train',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
     categorial_data = inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
     logging.debug('oridata_dim:{}'.format(categorial_data.shape[1]))
+    count_data = lables.shape[0]
+    logging.debug('count_data:{}'.format(count_data))
 
     try:
         dictsizes = pd.read_csv(FLAGS.dictsizefile)
@@ -44,7 +46,7 @@ def train_model(batch_size=FLAGS.batch_size):
     valid_inputs,valid_labels = utils.gendata(flag='valid',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
 
     #构建网络模型
-    dnnmodel = model.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim )
+    dnnmodel = model2.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim )
     dnnmodel.build()
 
     #如果没有checkpoint文件则需要对所有变量进行初始化
@@ -75,23 +77,26 @@ def train_model(batch_size=FLAGS.batch_size):
         while 1 == 1:
             # 使用训练数据进行模型训练
             batches = utils.genbatch(inputs, lables, batch_size=FLAGS.batch_size)
-            #logging.info('epoch:{}'.format(epoch))
             for step in range(len(inputs) // batch_size):
                 batch_inputs,batch_lables = next(batches)
                 continous_inputs = batch_inputs[:, 0:FLAGS.encod_cat_index_begin]
                 categorial_inputs = batch_inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
                 feed_dict = { dnnmodel.categorial_inputs:categorial_inputs, dnnmodel.continous_inputs:continous_inputs, dnnmodel.label:batch_lables, dnnmodel.keep_prob:FLAGS.keep_prob }
                 #with tf.Session() as sess:
-                global_step, _, logits, loss, accuracy, summaries = sess.run([dnnmodel.global_step, dnnmodel.train_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.train_summary_op], feed_dict=feed_dict)
+                global_step, _, logits, loss, accuracy, summaries, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.train_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.train_summary_op, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
                 train_summary_writer.add_summary(summaries, step)
+                np.savetxt('./log/tlogits.log', end_points['logits'])
+                np.savetxt('./log/tpre.log', end_points['prediction'])
+                np.savetxt('./log/tlabels.log', labels)
                 if global_step % FLAGS.logfrequency == 0:
                     #每间隔指定的频率打印日志并存储checkpoint文件
-                    logging.info('train: step [{0}] loss [{1}] accuracy [{2}]'.format(global_step, loss, accuracy))
+                    logging.info('train: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
                     try:
                         saver.save(sess, os.path.join(FLAGS.model_ouput_dir, "model.ckpt"), global_step=global_step)
                     except:
                         os.mkdir(FLAGS.model_ouput_dir)
                         saver.save(sess, os.path.join(FLAGS.model_ouput_dir, "model.ckpt"), global_step=global_step)
+                #if global_step >= FLAGS.Max_step or global_step > epoch * batch_size:
                 if global_step >= FLAGS.Max_step:
                     break
 
@@ -104,17 +109,18 @@ def train_model(batch_size=FLAGS.batch_size):
                 valid_categorial_inputs = batch_valid_inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
                 feed_dict = { dnnmodel.categorial_inputs:valid_categorial_inputs, dnnmodel.continous_inputs:valid_continous_inputs, dnnmodel.label:batch_valid_lables, dnnmodel.keep_prob:FLAGS.keep_prob }
                 #with tf.Session() as sess:
-                valid_global_step, logits, loss, accuracy = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy], feed_dict=feed_dict)
-                #if valid_global_step % FLAGS.logfrequency == 0:
+                valid_global_step, logits, loss, accuracy, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
+                np.savetxt('./log/logits.log', end_points['logits'])
+                np.savetxt('./log/pre.log', end_points['prediction'])
+                np.savetxt('./log/labels.log', labels)
                 if step % FLAGS.logfrequency == 0:
                     #每间隔指定的频率打印日志并存储checkpoint文件
-                    logging.info('valid: step [{0}] loss [{1}] accuracy [{2}]'.format(global_step, loss, accuracy))
+                    logging.info('valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
                     #saver.save(sess, os.path.join(FLAGS.model_ouput_dir, "model.ckpt"), global_step=global_step)
-
-            if global_step >= FLAGS.Max_step:
+            epoch = (global_step * batch_size) // count_data
+            logging.info('has completed epoch:{}'.format(epoch))
+            if epoch >= FLAGS.Max_epoch or global_step >= FLAGS.Max_step:
                 break
-            logging.info('next epoch')
-            epoch = epoch + 1
 
 if __name__ == '__main__':
     #train部分

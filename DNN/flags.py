@@ -8,6 +8,7 @@ def parse_args(check=True):
     parser.add_argument('--keep_prob',     type=float, default=config.keep_prob)
     parser.add_argument('--logfrequency',  type=int,   default=config.logfrequency)
     parser.add_argument('--Max_step',      type=int,   default=config.Max_step)
+    parser.add_argument('--Max_epoch',     type=int, default=config.Max_epoch)
     parser.add_argument('--embed_dim',     type=int,   default=config.embed_dim)
     parser.add_argument('--learning_rate', type=float, default=config.learning_rate)
     parser.add_argument('--oridata_dim',   type=int,   default=config.oridata_dim)
