@@ -50,7 +50,8 @@ def train_model(batch_size=FLAGS.batch_size):
     dnnmodel.build()
 
     #如果没有checkpoint文件则需要对所有变量进行初始化
-    with tf.Session() as sess:
+    #with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+    with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
         logging.debug('Initialized')
