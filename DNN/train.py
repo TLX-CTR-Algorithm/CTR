@@ -102,21 +102,42 @@ def train_model(batch_size=FLAGS.batch_size):
 
             logging.info('----------------------valid-----------------------')
             #使用验证数据，验证模型性能
-            valid_batches = utils.genbatch(valid_inputs, valid_labels, batch_size=FLAGS.batch_size)
-            for step in range(len(valid_inputs) // batch_size):
-                batch_valid_inputs,batch_valid_lables = next(valid_batches)
-                valid_continous_inputs = batch_valid_inputs[:, 0:FLAGS.encod_cat_index_begin]
-                valid_categorial_inputs = batch_valid_inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
-                feed_dict = { dnnmodel.categorial_inputs:valid_categorial_inputs, dnnmodel.continous_inputs:valid_continous_inputs, dnnmodel.label:batch_valid_lables, dnnmodel.keep_prob:FLAGS.keep_prob }
-                #with tf.Session() as sess:
+            if FLAGS.valid_switch == 0:
+                valid_continous_inputs = valid_inputs[:, 0:FLAGS.encod_cat_index_begin]
+                valid_categorial_inputs = valid_inputs[:, FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
+                feed_dict = {dnnmodel.categorial_inputs: valid_categorial_inputs,
+                             dnnmodel.continous_inputs: valid_continous_inputs, dnnmodel.label: valid_labels,
+                             dnnmodel.keep_prob: FLAGS.keep_prob}
                 valid_global_step, logits, loss, accuracy, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
-                #np.savetxt('./log/logits.log', end_points['logits'])
-                #np.savetxt('./log/pre.log', end_points['prediction'])
-                #np.savetxt('./log/labels.log', labels)
-                if step % FLAGS.logfrequency == 0:
-                    #每间隔指定的频率打印日志并存储checkpoint文件
-                    logging.info('valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
-                    #saver.save(sess, os.path.join(FLAGS.model_ouput_dir, "model.ckpt"), global_step=global_step)
+                logging.info(
+                    'valid0: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc,
+                                                                                   accuracy))
+            else:
+                valid_batches = utils.genbatch(valid_inputs, valid_labels, batch_size=FLAGS.batch_size)
+                loss_list = []
+                auc_list = []
+                accuracy_list = []
+                for step in range(len(valid_inputs) // batch_size):
+                    batch_valid_inputs,batch_valid_lables = next(valid_batches)
+                    valid_continous_inputs = batch_valid_inputs[:, 0:FLAGS.encod_cat_index_begin]
+                    valid_categorial_inputs = batch_valid_inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
+                    feed_dict = { dnnmodel.categorial_inputs:valid_categorial_inputs, dnnmodel.continous_inputs:valid_continous_inputs, dnnmodel.label:batch_valid_lables, dnnmodel.keep_prob:FLAGS.keep_prob }
+                    valid_global_step, logits, loss, accuracy, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
+
+                    loss_list.append(loss)
+                    auc_list.append(auc)
+                    accuracy_list.append(accuracy)
+                    #np.savetxt('./log/logits.log', end_points['logits'])
+                    #np.savetxt('./log/pre.log', end_points['prediction'])
+                    #np.savetxt('./log/labels.log', labels)
+                    #if step % FLAGS.logfrequency == 0:
+                        #每间隔指定的频率打印日志并存储checkpoint文件
+                     #   logging.info('valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
+                valid_loss = np.mean(loss_list)
+                valid_auc = np.mean(auc_list,0)
+                valid_accuracy = np.mean(accuracy_list)
+                logging.info( 'valid1: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, valid_loss, valid_auc, valid_accuracy))
+
             epoch = (global_step * batch_size) // count_data
             logging.info('has completed epoch:{}'.format(epoch))
             if epoch >= FLAGS.Max_epoch or global_step >= FLAGS.Max_step:
