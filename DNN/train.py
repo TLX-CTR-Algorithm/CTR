@@ -51,7 +51,7 @@ def train_model(batch_size=FLAGS.batch_size):
 
     #如果没有checkpoint文件则需要对所有变量进行初始化
     #with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
-    with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+    with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
         logging.debug('Initialized')
@@ -74,7 +74,6 @@ def train_model(batch_size=FLAGS.batch_size):
 
         #会按照配置内容来进行最大step之内的训练,到达Max_step自动停止训练
         global_step = 0
-        epoch=0
         while 1 == 1:
             # 使用训练数据进行模型训练
             batches = utils.genbatch(inputs, lables, batch_size=FLAGS.batch_size)
