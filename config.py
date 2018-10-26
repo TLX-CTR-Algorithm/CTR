@@ -31,6 +31,7 @@ dnn_log_dir = os.path.join(BASE_DIR, "DNN/log/")
 dnn_log_path = os.path.join(dnn_log_dir, dnn_log_file)
 encod_cat_index_begin = 4
 encod_cat_index_end = 30
+valid_switch = 1
 # 训练参数
 batch_size = 1000
 keep_prob = 0.8
