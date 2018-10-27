@@ -46,7 +46,10 @@ def train_model(batch_size=FLAGS.batch_size):
     valid_inputs,valid_labels = utils.gendata(flag='valid',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
 
     #构建网络模型
-    dnnmodel = model2.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim )
+    if FLAGS.model_flag == 'model':
+        dnnmodel = model.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim )
+    elif FLAGS.model_flag == 'model2':
+        dnnmodel = model2.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim)
     dnnmodel.build()
 
     #如果没有checkpoint文件则需要对所有变量进行初始化

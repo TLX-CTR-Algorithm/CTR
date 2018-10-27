@@ -32,11 +32,12 @@ dnn_log_path = os.path.join(dnn_log_dir, dnn_log_file)
 encod_cat_index_begin = 4
 encod_cat_index_end = 30
 valid_switch = 1
+model_flag = 'model'
 # 训练参数
-batch_size = 1000
+batch_size = 100
 keep_prob = 0.8
 logfrequency = 10
-Max_step = 20000000
+Max_step = 2000000000
 Max_epoch = 6
 embed_dim = 128
 learning_rate = 0.01

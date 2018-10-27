@@ -13,6 +13,7 @@ def parse_args(check=True):
     parser.add_argument('--learning_rate', type=float, default=config.learning_rate)
     parser.add_argument('--oridata_dim',   type=int,   default=config.oridata_dim)
     parser.add_argument('--valid_switch',  type=int, default=config.valid_switch)
+    parser.add_argument('--model_flag',    type=str, default=config.model_flag)
     # 路径和文件配置
     parser.add_argument('--encod_train_path',      type=str, default=config.encod_train_path)
     parser.add_argument('--encod_vaild_path',      type=str, default=config.encod_vaild_path)
