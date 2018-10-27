@@ -11,7 +11,7 @@ slim = tf.contrib.slim
 
 # 实现模型的构建以及损失函数交叉熵的计算
 class Model():
-    def __init__(self, learning_rate, oridata_dim, embed_max, embed_dim=128):
+    def __init__(self, learning_rate, oridata_dim, embed_max, embed_dim=128, decay_steps=5000, decay_rate=0.96):
         self.learning_rate = learning_rate
         self.layers = [6, 6, 6]
         self.oridata_dim = oridata_dim
@@ -20,6 +20,8 @@ class Model():
         self.growth = 128
         self.outunits = 2048
         self.outrate = 0.5
+        self.decay_steps = decay_steps
+        self.decay_rate = decay_rate
 
     def embeding(self, embed_inputs):
         with tf.name_scope("embedding"):
@@ -183,7 +185,8 @@ class Model():
             #self.loss = self.log_loss
             self.loss = tf.reduce_mean(self.log_loss)
 
-        optimizer = tf.train.FtrlOptimizer(self.learning_rate)
+        step_learning_rate = tf.train.exponential_decay(self.learning_rate, self.global_step, self.decay_steps, self.decay_rate, staircase=True, name='step_learning_rate')
+        optimizer = tf.train.FtrlOptimizer(step_learning_rate)
         self.gradients = optimizer.compute_gradients(self.loss)
         self.train_step = optimizer.apply_gradients(self.gradients, global_step=self.global_step)
 

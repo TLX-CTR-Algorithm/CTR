@@ -47,9 +47,9 @@ def train_model(batch_size=FLAGS.batch_size):
 
     #构建网络模型
     if FLAGS.model_flag == 'model':
-        dnnmodel = model.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim )
+        dnnmodel = model.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim, decay_steps=FLAGS.decay_steps, decay_rate=FLAGS.decay_rate )
     elif FLAGS.model_flag == 'model2':
-        dnnmodel = model2.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim)
+        dnnmodel = model2.Model(learning_rate=FLAGS.learning_rate, oridata_dim=categorial_data.shape[1], embed_max=embed_max, embed_dim=FLAGS.embed_dim, decay_steps=FLAGS.decay_steps, decay_rate=FLAGS.decay_rate)
     dnnmodel.build()
 
     #如果没有checkpoint文件则需要对所有变量进行初始化
@@ -77,6 +77,7 @@ def train_model(batch_size=FLAGS.batch_size):
 
         #会按照配置内容来进行最大step之内的训练,到达Max_step自动停止训练
         global_step = 0
+        epoch = 1
         while 1 == 1:
             # 使用训练数据进行模型训练
             batches = utils.genbatch(inputs, lables, batch_size=FLAGS.batch_size)
