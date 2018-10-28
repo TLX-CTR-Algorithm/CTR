@@ -13,7 +13,7 @@ slim = tf.contrib.slim
 class Model():
     def __init__(self, learning_rate, oridata_dim, embed_max, embed_dim=128, decay_steps=5000, decay_rate=0.96):
         self.learning_rate = learning_rate
-        self.layers = [6, 6, 6]
+        self.layers = [6, 6, 3]
         self.oridata_dim = oridata_dim
         self.embed_dim = embed_dim
         self.embed_max = embed_max
