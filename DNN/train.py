@@ -7,6 +7,7 @@ import pandas as pd
 import os
 import numpy as np
 import re
+import math
 from DNN import flags
 
 slim = tf.contrib.slim
@@ -16,7 +17,10 @@ if not os.path.exists(FLAGS.dnn_log_dir):
     os.mkdir(FLAGS.dnn_log_dir)
 #设置日志打印格式
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+if FLAGS.debug_level  == 'DEBUG':
+    logger.setLevel(logging.DEBUG)
+elif FLAGS.debug_level  == 'INFO':
+    logger.setLevel(logging.INFO)
 sh = logging.StreamHandler()
 sh.setFormatter(logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'))
 fl = logging.FileHandler(FLAGS.dnn_log_path)
@@ -81,6 +85,9 @@ def train_model(batch_size=FLAGS.batch_size):
         while 1 == 1:
             # 使用训练数据进行模型训练
             batches = utils.genbatch(inputs, lables, batch_size=FLAGS.batch_size)
+            train_loss_list=[]
+            train_auc_list = []
+            train_accuracy_list = []
             for step in range(len(inputs) // batch_size):
                 batch_inputs,batch_lables = next(batches)
                 continous_inputs = batch_inputs[:, 0:FLAGS.encod_cat_index_begin]
@@ -89,12 +96,15 @@ def train_model(batch_size=FLAGS.batch_size):
                 #with tf.Session() as sess:
                 global_step, _, logits, loss, accuracy, summaries, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.train_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.train_summary_op, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
                 train_summary_writer.add_summary(summaries, step)
+                train_loss_list.append(loss)
+                train_auc_list.append(auc[0])
+                train_accuracy_list.append(accuracy)
                 #np.savetxt('./log/tlogits.log', end_points['logits'])
                 #np.savetxt('./log/tpre.log', end_points['prediction'])
                 #np.savetxt('./log/tlabels.log', labels)
                 if global_step % FLAGS.logfrequency == 0:
                     #每间隔指定的频率打印日志并存储checkpoint文件
-                    logging.info('train: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
+                    logging.debug('train: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
                     try:
                         saver.save(sess, os.path.join(FLAGS.model_ouput_dir, "model.ckpt"), global_step=global_step)
                     except:
@@ -103,8 +113,11 @@ def train_model(batch_size=FLAGS.batch_size):
                 #if global_step >= FLAGS.Max_step or global_step > epoch * batch_size:
                 if global_step >= FLAGS.Max_step:
                     break
+            train_loss = np.mean(train_loss_list)
+            train_auc = np.mean(train_auc_list, 0)
+            train_accuracy = np.mean(train_accuracy_list)
 
-            logging.info('----------------------valid-----------------------')
+            logging.debug('----------------------valid-----------------------')
             #使用验证数据，验证模型性能
             if FLAGS.valid_switch == 0:
                 valid_continous_inputs = valid_inputs[:, 0:FLAGS.encod_cat_index_begin]
@@ -113,8 +126,8 @@ def train_model(batch_size=FLAGS.batch_size):
                              dnnmodel.continous_inputs: valid_continous_inputs, dnnmodel.label: valid_labels,
                              dnnmodel.keep_prob: FLAGS.keep_prob}
                 valid_global_step, logits, loss, accuracy, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
-                logging.info(
-                    'valid0: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc,
+                logging.debug(
+                    'valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc,
                                                                                    accuracy))
             else:
                 valid_batches = utils.genbatch(valid_inputs, valid_labels, batch_size=FLAGS.batch_size)
@@ -129,7 +142,7 @@ def train_model(batch_size=FLAGS.batch_size):
                     valid_global_step, logits, loss, accuracy, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
 
                     loss_list.append(loss)
-                    auc_list.append(auc)
+                    auc_list.append(auc[0])
                     accuracy_list.append(accuracy)
                     #np.savetxt('./log/logits.log', end_points['logits'])
                     #np.savetxt('./log/pre.log', end_points['prediction'])
@@ -140,10 +153,15 @@ def train_model(batch_size=FLAGS.batch_size):
                 valid_loss = np.mean(loss_list)
                 valid_auc = np.mean(auc_list,0)
                 valid_accuracy = np.mean(accuracy_list)
-                logging.info( 'valid1: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, valid_loss, valid_auc, valid_accuracy))
+                logging.debug( 'valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, valid_loss, valid_auc, valid_accuracy))
 
-            epoch = (global_step * batch_size) // count_data
-            logging.info('has completed epoch:{}'.format(epoch))
+            #epoch = (global_step * batch_size) // count_data
+            epoch = math.ceil((global_step * batch_size) / count_data)
+            logging.debug('has completed epoch:{}'.format(epoch))
+
+            logging.info('epoch [{0}] train_loss [{1}] valid_loss [{2}] train_auc [{3}] valid_auc [{4}] train_accuracy [{5}] valid_accuracy [{6}]'.format(
+                epoch, train_loss, valid_loss, train_auc, valid_auc, train_accuracy, valid_accuracy
+            ))
             if epoch >= FLAGS.Max_epoch or global_step >= FLAGS.Max_step:
                 break
 

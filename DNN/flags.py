@@ -28,6 +28,8 @@ def parse_args(check=True):
     parser.add_argument('--dnn_log_path',          type=str, default=config.dnn_log_path)
     parser.add_argument('--encod_cat_index_begin', type=int, default=config.encod_cat_index_begin)
     parser.add_argument('--encod_cat_index_end',   type=int, default=config.encod_cat_index_end)
+    #日志显示等级
+    parser.add_argument('--debug_level', type=str, default=config.debug_level)
 
     FLAGS, unparsed = parser.parse_known_args()
     return FLAGS, unparsed
