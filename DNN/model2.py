@@ -3,12 +3,14 @@ import tensorflow as tf
 slim = tf.contrib.slim
 
 class Model():
-    def __init__(self, learning_rate,oridata_dim,embed_max,embed_dim=128):
+    def __init__(self, learning_rate, oridata_dim, embed_max, embed_dim=128, decay_steps=5000, decay_rate=0.96):
         self.learning_rate = learning_rate
         self.outunits = [1024, 128, 8]
         self.oridata_dim = oridata_dim
         self.embed_dim = int(embed_dim)
         self.embed_max = int(embed_max)
+        self.decay_steps = decay_steps
+        self.decay_rate = decay_rate
 
     def embeding(self,embed_inputs):
         with tf.name_scope("embedding"):
@@ -81,11 +83,10 @@ class Model():
             self.log_loss = tf.losses.log_loss(labels=self.label,predictions=self.end_points['prediction'])
             self.loss = tf.reduce_mean(self.log_loss)
 
-        #返回logloss异常的数据索引
-
+        step_learning_rate = tf.train.exponential_decay(self.learning_rate, self.global_step, self.decay_steps, self.decay_rate, staircase=True, name='step_learning_rate')
         #self.train_step = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss,global_step=self.global_step)
         #self.optimizer = train_op.apply_gradients()
-        optimizer = tf.train.FtrlOptimizer(self.learning_rate)
+        optimizer = tf.train.FtrlOptimizer(step_learning_rate)
         #结果证明使用adam优化器，在这个问题上效果比Ftrl优化器差很多
         #optimizer = tf.train.AdamOptimizer(self.learning_rate)
         self.gradients = optimizer.compute_gradients(self.loss)

@@ -19,6 +19,7 @@ field2count = os.path.join(BASE_DIR, "avazu_CTR/field2count/")
 print(test_path)
 
 # 深度网络相关配置
+debug_level='INFO'
 # 路径和文件配置
 encod_train_path = os.path.join(BASE_DIR, "output/model_data/train.txt")
 encod_vaild_path = os.path.join(BASE_DIR, "output/model_data/valid.txt")
@@ -32,13 +33,15 @@ dnn_log_path = os.path.join(dnn_log_dir, dnn_log_file)
 encod_cat_index_begin = 4
 encod_cat_index_end = 30
 valid_switch = 1
-model_flag = 'model'
+model_flag = 'model2'
 # 训练参数
 batch_size = 100
 keep_prob = 0.8
 logfrequency = 10
 Max_step = 2000000000
-Max_epoch = 6
+Max_epoch = 50
 embed_dim = 128
 learning_rate = 0.01
+decay_rate = 0.96
+decay_steps = 5000
 oridata_dim = 23
