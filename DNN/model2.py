@@ -36,9 +36,11 @@ class Model():
         #branch_continous = inputs[:,0:config.encod_cat_index_begin]
         #branch_continous = inputs[:, 0:4]
         #branch_continous_2 = slim.fully_connected(continous_inputs,40, activation_fn=None, scope=end_point)
-        branch_continous_2 = slim.fully_connected(continous_inputs, 40, scope=end_point)
+        continous_current = slim.batch_norm(continous_inputs, scope=end_point + '_bn')
+        branch_continous_2 = slim.fully_connected(continous_current, 40, weights_initializer=tf.initializers.random_uniform(),scope=end_point)
         end_point = 'concat_con_cat'
         net = tf.concat([branch_continous_2,branch_embed],1,name=end_point)
+        net = slim.batch_norm(net, scope=end_point + '_bn2')
 
         end_point = 'fully_con1'
         #net = slim.fully_connected(net, self.outunits[0], activation_fn=None, scope=end_point)
