@@ -1,6 +1,8 @@
 import tensorflow as tf
+from DNN import flags
 
 slim = tf.contrib.slim
+FLAGS, unparsed = flags.parse_args()
 
 class Model():
     def __init__(self, learning_rate, oridata_dim, embed_max, embed_dim=128, decay_steps=5000, decay_rate=0.96):
@@ -72,7 +74,7 @@ class Model():
         return logits, end_points
 
     def build(self):
-        self.continous_inputs = tf.placeholder(tf.float32, [None,4], name='continous_inputs')
+        self.continous_inputs = tf.placeholder(tf.float32, [None,FLAGS.encod_cat_index_begin], name='continous_inputs')
         #self.categorial_inputs = tf.placeholder(tf.float32, [None,26], name='categorial_inputs')
         self.categorial_inputs = tf.placeholder(tf.float32, name='categorial_inputs')
         self.label = tf.placeholder(tf.float32, name='label')
