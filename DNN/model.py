@@ -3,11 +3,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+from DNN import flags
 import tensorflow as tf
 
 slim = tf.contrib.slim
-
+FLAGS, unparsed = flags.parse_args()
 
 # 实现模型的构建以及损失函数交叉熵的计算
 class Model():
@@ -173,7 +173,7 @@ class Model():
 
     def build(self):
         self.default_inputs_size = 2048
-        self.continous_inputs = tf.placeholder(tf.float32, [None,4], name='continous_inputs')
+        self.continous_inputs = tf.placeholder(tf.float32, [None,FLAGS.encod_cat_index_begin], name='continous_inputs')
         self.categorial_inputs = tf.placeholder(tf.float32, name='categorial_inputs')
         self.label = tf.placeholder(tf.float32, name='label')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
