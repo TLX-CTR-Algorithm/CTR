@@ -1,4 +1,5 @@
 import pandas as pd
+import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn import preprocessing
@@ -193,11 +194,10 @@ def genbatch(feature_data,label_data=None,batch_size=200):
             yield feature_data[start:end], label_data[start:end]
 
 # 获取特征工程处理后的数据
-def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='output/model_data/valid.txt',test_path='output/model_data/test.txt',ffm_path='output/model_data/ffm.txt'):
+def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='output/model_data/valid.txt',test_path='output/model_data/test.txt'):
     encod_train_path = train_path
     encod_vaild_path = vaild_path
     encod_test_path = test_path
-    encod_ffm_path = ffm_path
 
     if flag == 'train':
         train_data = np.loadtxt(encod_train_path,delimiter=',')
@@ -219,9 +219,28 @@ def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='ou
         test_feature_data = np.concatenate([test_continous_standard_data, test_categorial_data], axis=1)
         return test_feature_data
     elif flag == 'ffm':
-        ffm_data = np.loadtxt(encod_ffm_path,delimiter=',')
+        filename_queue = tf.train.string_input_producer([encod_ffm_path])
+        reader = tf.FixedLengthRecordReader()
+        ffm_data = reader.read(filename_queue)
         return ffm_data
     else:
         logging.error('arguments of function gendata must be train,test or valid')
         sys.exit()
+
+# 获取FFM模型的数据
+def genffm(flag='train',train_path='output/model_data/train_ffm.txt.bin',vaild_path='output/model_data/valid_ffm.txt.bin',test_path='output/model_data/test_ffm.txt.bin'):
+    if flag == 'train':
+        ffm_path = train_path
+    elif flag == 'valid':
+        ffm_path = vaild_path
+    elif flag == 'test':
+        ffm_path = test_path
+    else:
+        logging.error('arguments of function gendata must be train,test or valid')
+        sys.exit()
+    #filename_queue = tf.train.string_input_producer([ffm_path])
+    #reader = tf.FixedLengthRecordReader(record_bytes=1)
+    #ffm_data = reader.read(filename_queue)
+    ffm_data = np.fromfile(ffm_path, dtype=np.int32)
+    return ffm_data[:,np.newaxis]
 
