@@ -20,7 +20,6 @@ def parse_args(check=True):
     parser.add_argument('--encod_train_path',      type=str, default=config.encod_train_path)
     parser.add_argument('--encod_vaild_path',      type=str, default=config.encod_vaild_path)
     parser.add_argument('--encod_test_path',       type=str, default=config.encod_test_path)
-    parser.add_argument('--encod_ffm_path',        type=str, default=config.encod_fmm_path)
     parser.add_argument('--dictsizefile',          type=str, default=config.dictsizefile)
     parser.add_argument('--model_ouput_dir',       type=str, default=config.model_ouput_dir)
     parser.add_argument('--summary_dir',           type=str, default=config.summary_dir)
@@ -29,6 +28,9 @@ def parse_args(check=True):
     parser.add_argument('--dnn_log_path',          type=str, default=config.dnn_log_path)
     parser.add_argument('--encod_cat_index_begin', type=int, default=config.encod_cat_index_begin)
     parser.add_argument('--encod_cat_index_end',   type=int, default=config.encod_cat_index_end)
+    parser.add_argument('--ffm_train_path',        type=str, default=config.ffm_train_path)
+    parser.add_argument('--ffm_valid_path',        type=str, default=config.ffm_valid_path)
+    parser.add_argument('--ffm_test_path',         type=str, default=config.ffm_test_path)
     #日志显示等级
     parser.add_argument('--debug_level', type=str, default=config.debug_level)
 

@@ -82,7 +82,7 @@ class Model():
         self.continous_inputs = tf.placeholder(tf.float32, [None,FLAGS.encod_cat_index_begin], name='continous_inputs')
         #self.categorial_inputs = tf.placeholder(tf.float32, [None,26], name='categorial_inputs')
         self.categorial_inputs = tf.placeholder(tf.float32, name='categorial_inputs')
-        self.ffm_logits = tf.placeholder(tf.float32, name='ffm_logits')
+        self.ffm_logits = tf.placeholder(tf.float32, [None,1], name='ffm_logits')
         self.label = tf.placeholder(tf.float32, name='label')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
         self.global_step = tf.Variable(0, trainable=False, name='self.global_step', dtype=tf.int64)
