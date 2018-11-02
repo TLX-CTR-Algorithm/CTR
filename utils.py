@@ -193,10 +193,11 @@ def genbatch(feature_data,label_data=None,batch_size=200):
             yield feature_data[start:end], label_data[start:end]
 
 # 获取特征工程处理后的数据
-def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='output/model_data/valid.txt',test_path='output/model_data/test.txt'):
+def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='output/model_data/valid.txt',test_path='output/model_data/test.txt',ffm_path='output/model_data/ffm.txt'):
     encod_train_path = train_path
     encod_vaild_path = vaild_path
     encod_test_path = test_path
+    encod_ffm_path = ffm_path
 
     if flag == 'train':
         train_data = np.loadtxt(encod_train_path,delimiter=',')
@@ -217,6 +218,9 @@ def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='ou
         test_continous_standard_data = standard(test_continous_data)
         test_feature_data = np.concatenate([test_continous_standard_data, test_categorial_data], axis=1)
         return test_feature_data
+    elif flag == 'ffm':
+        ffm_data = np.loadtxt(encod_ffm_path,delimiter=',')
+        return ffm_data
     else:
         logging.error('arguments of function gendata must be train,test or valid')
         sys.exit()
