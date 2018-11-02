@@ -33,6 +33,7 @@ logger.addHandler(fl)
 def train_model(batch_size=FLAGS.batch_size):
     #获取训练数据
     inputs, lables = utils.gendata(flag='train',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
+    ffm_inputs = utils.genffm(flag='train', train_path=FLAGS.ffm_train_path, vaild_path=FLAGS.ffm_valid_path, test_path=FLAGS.ffm_test_path)
     categorial_data = inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
     logging.debug('oridata_dim:{}'.format(categorial_data.shape[1]))
     count_data = lables.shape[0]
@@ -49,7 +50,7 @@ def train_model(batch_size=FLAGS.batch_size):
     #获取校验数据
     valid_inputs,valid_labels = utils.gendata(flag='valid',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
     #获取FFM数据
-    ffm_inputs = utils.gendata(flag='ffm',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
+    valid_ffm_inputs = utils.genffm(flag='valid',train_path=FLAGS.ffm_train_path,vaild_path=FLAGS.ffm_valid_path,test_path=FLAGS.ffm_test_path)
 
     #构建网络模型
     if FLAGS.model_flag == 'model':
@@ -128,21 +129,23 @@ def train_model(batch_size=FLAGS.batch_size):
                 valid_categorial_inputs = valid_inputs[:, FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
                 feed_dict = {dnnmodel.categorial_inputs: valid_categorial_inputs,
                              dnnmodel.continous_inputs: valid_continous_inputs, dnnmodel.label: valid_labels,
-                             dnnmodel.keep_prob: FLAGS.keep_prob}
+                             dnnmodel.keep_prob: FLAGS.keep_prob, dnnmodel.ffm_logits:valid_ffm_inputs}
                 valid_global_step, logits, loss, accuracy, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
                 logging.debug(
                     'valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc,
                                                                                    accuracy))
             else:
                 valid_batches = utils.genbatch(valid_inputs, valid_labels, batch_size=FLAGS.batch_size)
+                valid_batches2 = utils.genbatch(valid_ffm_inputs, batch_size=FLAGS.batch_size)
                 loss_list = []
                 auc_list = []
                 accuracy_list = []
                 for step in range(len(valid_inputs) // batch_size):
                     batch_valid_inputs,batch_valid_lables = next(valid_batches)
+                    batch_valid_ffm = next(valid_batches2)
                     valid_continous_inputs = batch_valid_inputs[:, 0:FLAGS.encod_cat_index_begin]
                     valid_categorial_inputs = batch_valid_inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
-                    feed_dict = { dnnmodel.categorial_inputs:valid_categorial_inputs, dnnmodel.continous_inputs:valid_continous_inputs, dnnmodel.label:batch_valid_lables, dnnmodel.keep_prob:FLAGS.keep_prob }
+                    feed_dict = { dnnmodel.categorial_inputs:valid_categorial_inputs, dnnmodel.continous_inputs:valid_continous_inputs, dnnmodel.label:batch_valid_lables, dnnmodel.keep_prob:FLAGS.keep_prob, dnnmodel.ffm_logits:batch_valid_ffm}
                     valid_global_step, logits, loss, accuracy, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
 
                     loss_list.append(loss)
