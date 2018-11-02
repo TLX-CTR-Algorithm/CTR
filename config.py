@@ -24,6 +24,7 @@ debug_level='INFO'
 encod_train_path = os.path.join(BASE_DIR, "output/model_data/train.txt")
 encod_vaild_path = os.path.join(BASE_DIR, "output/model_data/valid.txt")
 encod_test_path = os.path.join(BASE_DIR, "output/model_data/test.txt")
+encod_ffm_path = os.path.join(BASE_DIR, "output/model_data/ffm.txt")
 dictsizefile = os.path.join(BASE_DIR, "output/model_data/dictsize.csv")
 model_ouput_dir = os.path.join(BASE_DIR, "DNN/model_output/")
 summary_dir = os.path.join(BASE_DIR, "DNN/summary/")
