@@ -23,7 +23,7 @@ class Model():
             embed_layer = tf.reshape(embed_layer, [-1, self.embed_dim * oridata_dim])
         return embed_layer
 
-    def construction(self,continous_inputs, categorial_inputs, keep_prob):
+    def construction(self,continous_inputs, categorial_inputs, ffm_logits, keep_prob):
         end_points = {}
 
         #进行embeding
@@ -63,6 +63,11 @@ class Model():
         logits = slim.fully_connected(net, self.outunits[2], scope=end_point)
         end_points[end_point] = logits
 
+        end_point = 'merge'
+        net = tf.concat([logits, ffm_logits], 1, name=end_point)
+        logits = slim.fully_connected(net, self.outunits[2], scope=end_point)
+        end_points[end_point] = logits
+
         #模型融合的时候只需要使用logits进行融合即可，这里求prediction主要是为了便于单独训练用，从而对模型性能进行验证
         end_point = 'prediction'
         prediction = slim.fully_connected(net, 1, activation_fn=tf.nn.sigmoid, scope=end_point)
@@ -77,12 +82,13 @@ class Model():
         self.continous_inputs = tf.placeholder(tf.float32, [None,FLAGS.encod_cat_index_begin], name='continous_inputs')
         #self.categorial_inputs = tf.placeholder(tf.float32, [None,26], name='categorial_inputs')
         self.categorial_inputs = tf.placeholder(tf.float32, name='categorial_inputs')
+        self.ffm_logits = tf.placeholder(tf.float32, name='ffm_logits')
         self.label = tf.placeholder(tf.float32, name='label')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
         self.global_step = tf.Variable(0, trainable=False, name='self.global_step', dtype=tf.int64)
 
         with tf.variable_scope('fullyconnect_3'):
-            self.logits, self.end_points = self.construction(self.continous_inputs, self.categorial_inputs, self.keep_prob)
+            self.logits, self.end_points = self.construction(self.continous_inputs, self.categorial_inputs, self.ffm_logits, self.keep_prob)
             self.log_loss = tf.losses.log_loss(labels=self.label,predictions=self.end_points['prediction'])
             self.loss = tf.reduce_mean(self.log_loss)
 

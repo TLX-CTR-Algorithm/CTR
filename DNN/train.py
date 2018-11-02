@@ -48,6 +48,8 @@ def train_model(batch_size=FLAGS.batch_size):
 
     #获取校验数据
     valid_inputs,valid_labels = utils.gendata(flag='valid',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
+    #获取FFM数据
+    ffm_inputs = utils.gendata(flag='ffm',train_path=FLAGS.encod_train_path,vaild_path=FLAGS.encod_vaild_path,test_path=FLAGS.encod_test_path)
 
     #构建网络模型
     if FLAGS.model_flag == 'model':
@@ -85,14 +87,16 @@ def train_model(batch_size=FLAGS.batch_size):
         while 1 == 1:
             # 使用训练数据进行模型训练
             batches = utils.genbatch(inputs, lables, batch_size=FLAGS.batch_size)
+            batches2 = utils.genbatch(ffm_inputs, batch_size=FLAGS.batch_size)
             train_loss_list=[]
             train_auc_list = []
             train_accuracy_list = []
             for step in range(len(inputs) // batch_size):
                 batch_inputs,batch_lables = next(batches)
+                batch_ffm = next(batches2)
                 continous_inputs = batch_inputs[:, 0:FLAGS.encod_cat_index_begin]
                 categorial_inputs = batch_inputs[:,FLAGS.encod_cat_index_begin:FLAGS.encod_cat_index_end]
-                feed_dict = { dnnmodel.categorial_inputs:categorial_inputs, dnnmodel.continous_inputs:continous_inputs, dnnmodel.label:batch_lables, dnnmodel.keep_prob:FLAGS.keep_prob }
+                feed_dict = { dnnmodel.categorial_inputs:categorial_inputs, dnnmodel.continous_inputs:continous_inputs, dnnmodel.label:batch_lables, dnnmodel.keep_prob:FLAGS.keep_prob, dnnmodel.ffm_logits:batch_ffm}
                 #with tf.Session() as sess:
                 global_step, _, logits, loss, accuracy, summaries, auc, end_points, labels = sess.run([dnnmodel.global_step, dnnmodel.train_step, dnnmodel.logits, dnnmodel.loss, dnnmodel.accuracy, dnnmodel.train_summary_op, dnnmodel.auc, dnnmodel.end_points, dnnmodel.label], feed_dict=feed_dict)
                 train_summary_writer.add_summary(summaries, step)
