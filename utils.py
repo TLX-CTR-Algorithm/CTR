@@ -10,6 +10,8 @@ import sys
 import random
 import hashlib
 import csv
+import config
+import logging
 
 
 def en_dummy(data, cate_vn_list):

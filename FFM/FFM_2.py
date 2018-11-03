@@ -7,7 +7,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 '''
 configure
 '''
-batch_size = 128
+batch_size = 1000
 learning_rate = 0.001
 data_path = './norm_test_data.txt'
 
