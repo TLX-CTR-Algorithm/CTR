@@ -6,6 +6,8 @@ import os
 import sys
 import random
 import csv
+import config
+import logging
 
 def gen_folder(dnsp_data_dir, fe_gen_dir, model_data_dir):
     '''
