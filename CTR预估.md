@@ -578,6 +578,99 @@ class CategoryDictGenerator:
 
 
 
+#### 2.4.4 均值编码
+
+##### **基本思路与原理**：
+
+​	平均数编码是一种有监督（supervised）的编码方式，适用于分类和回归问题。为了简化讨论，以下的所有代码都以分类问题作为例子。
+
+​	假设在分类问题中，目标**y**一共有**C**个不同类别，具体的一个类别用**target**表示；某一个定性特征**variable**一共有**K**个不同类别，具体的一个类别用**k**表示。
+
+**先验概率（prior）**：数据点属于某一个target（y）的概率，![P(y = target)](https://www.zhihu.com/equation?tex=P%28y+%3D+target%29)
+
+**后验概率（posterior）**：该定性特征属于某一类时，数据点属于某一个target（y）的概率,
+
+​					$P(target = y|variable= k)$
+
+本算法的基本思想：**将variable中的每一个k，都表示为（估算的）它所对应的目标y值概率**：
+
+​					$\hat{P}(target = y|variable= k)$（估算的结果都用“^”表示，以示区分）
+
+（备注）因此，整个数据集将增加（C-1）列，是C-1而不是C的原因：
+
+$\sum_{i}\hat{P}(target = y_{i}|variable= k) = 1$，所以最后一个$y_{i}$的概率值必然和其他$y_{i}$的概率值线性相关。在线性模型、神经网络以及SVM里，不能加入线性相关的特征列。如果你使用的是基于决策树的模型（gbdt、rf等），个人仍然不推荐这种over-parameterization。
+
+
+
+##### **先验概率与后验概率的计算**：
+
+​	因为我们没有上帝视角，所以我们在计算中，需要利用已有数据**估算先验概率和后验概率**。我们在此使用的具体方法被称为**Empirical Bayes**。和一般的贝叶斯方法（如常见的Laplace Smoothing）不同，我们在估算先验概率时，会使用已知数据的平均值，而不是$\frac{1}{C}$。
+
+接下来的计算就是简单的统计：
+
+$\hat{P}(y = target )$ = (y = target)的数量 / y 的总数
+
+$\hat{P}(target = y|variable= k)$ = (y = target 并且 variable = k)的数量 / (variable = k)的数量
+
+使用不同的统计方法，以上两个公式的计算方法也会不同。
+
+**权重**：
+
+我们已经得到了先验概率估计$\hat{P}(target = y)$和后验概率估计$\hat{P}(target = y|variable= k)$。最终编码所使用的概率估算，应当是先验概率与后验概率的一个凸组合（convex combination）。由此，我们引入**先验概率的权重**![\lambda ](https://www.zhihu.com/equation?tex=%5Clambda+)来计算编码所用概率![\hat{P}](https://www.zhihu.com/equation?tex=%5Chat%7BP%7D)：
+
+$$\hat{P} = \lambda*\hat{P}(y = target ) + (1 - \lambda)*\hat{P}(target = y|variable= k)$$
+
+或：![\hat{P} = \lambda * prior + (1 - \lambda) * posterior](https://www.zhihu.com/equation?tex=%5Chat%7BP%7D+%3D+%5Clambda+%2A+prior+%2B+%281+-+%5Clambda%29+%2A+posterior)
+
+直觉上，![\lambda ](https://www.zhihu.com/equation?tex=%5Clambda+)应该具有以下特性：
+
+1. 如果测试集中出现了新的特征类别（未在训练集中出现），那么![\lambda = 1](https://www.zhihu.com/equation?tex=%5Clambda+%3D+1)。
+2. 一个特征类别在训练集内出现的次数越多，后验概率的可信度越高，其权重也越大。
+
+在贝叶斯统计学中，$\lambda$也被称为shrinkage parameter。
+
+**权重函数**：
+
+我们需要定义一个**权重函数**，**输入**是**特征类别在训练集中出现的次数**n，**输出**是对于这个特征类别的**先验概率的权重![\lambda](https://www.zhihu.com/equation?tex=%5Clambda)**。假设一个特征类别的出现次数为n，以下是一个常见的权重函数：
+
+​							$$\lambda(n) = \frac{1}{1 + e^{(n-k)/f}}$$
+
+这个函数有两个参数：
+
+k：当$n = k$时，$\lambda = 0.5$，先验概率与后验概率的权重相同；当$n > k$时，$\lambda < 0.5$。
+
+由于时间关系，项目第三周后才决定加入均值编码，这里取巧将$\lambda$取值为1，利用后验概率对device_id，device_ip进行编码。
+
+```python
+def scan(path, is_trian):
+    '''
+    统计设备id，设备ip，用户，用户-时间的频数，各设备id的点击率，各设备ip的点击率
+    '''
+    id_cnt = collections.defaultdict(int)
+    id_cnt_1 = collections.defaultdict(int)
+    ip_cnt = collections.defaultdict(int)
+    ip_cnt_1 = collections.defaultdict(int)
+    user_cnt = collections.defaultdict(int)
+    user_hour_cnt = collections.defaultdict(int)
+    file = open(path)
+    for i, row in enumerate(csv.DictReader(file), start=1):
+        # print(row)
+        user = def_user(row)
+
+        id_cnt[row['device_id']] += 1  # 统计device_id各特征值计数,反映该设备浏览广告数目
+        ip_cnt[row['device_ip']] += 1  # 统计device_ip各特征值计数，反映该ip浏览广告数目
+        if is_trian:
+                id_cnt_1[row['device_id']] += int(row['click'])
+                ip_cnt_1[row['device_ip']] += int(row['click'])
+
+        user_cnt[user] += 1  # 用户计数，各浏览者浏览广告数目，反映具体人广告推送的情况
+        user_hour_cnt[user + '-' + row['hour']] += 1  # 组合具体人与时间，反映具体人的活动时间分布
+    file.close()
+    return  id_cnt, ip_cnt, user_cnt, user_hour_cnt,id_cnt_1, ip_cnt_1
+```
+
+
+
 ## 3 模型构建
 
 ### 3.1 单模型
@@ -666,3 +759,12 @@ class CategoryDictGenerator:
 
 ## 5 心得体会
 
+
+
+
+
+## 6 参考
+
+1. https://zhuanlan.zhihu.com/p/26308272
+2. http://101.96.10.63/helios.mm.di.uoa.gr/~rouvas/ssi/sigkdd/sigkdd.vol3.1/barreca.pdf
+3. 
