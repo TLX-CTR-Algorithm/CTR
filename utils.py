@@ -218,17 +218,12 @@ def gendata(flag='train',train_path='output/model_data/train.txt',vaild_path='ou
         test_continous_standard_data = standard(test_continous_data)
         test_feature_data = np.concatenate([test_continous_standard_data, test_categorial_data], axis=1)
         return test_feature_data
-    elif flag == 'ffm':
-        filename_queue = tf.train.string_input_producer([encod_ffm_path])
-        reader = tf.FixedLengthRecordReader()
-        ffm_data = reader.read(filename_queue)
-        return ffm_data
     else:
         logging.error('arguments of function gendata must be train,test or valid')
         sys.exit()
 
 # 获取FFM模型的数据
-def genffm(flag='train',train_path='output/model_data/train_ffm.txt.bin',vaild_path='output/model_data/valid_ffm.txt.bin',test_path='output/model_data/test_ffm.txt.bin'):
+def genffm(flag='train',train_path='output/model_data/train_pred.txt',vaild_path='output/model_data/vaild_pred.txt',test_path='output/model_data/test_pred.txt'):
     if flag == 'train':
         ffm_path = train_path
     elif flag == 'valid':
@@ -241,6 +236,7 @@ def genffm(flag='train',train_path='output/model_data/train_ffm.txt.bin',vaild_p
     #filename_queue = tf.train.string_input_producer([ffm_path])
     #reader = tf.FixedLengthRecordReader(record_bytes=1)
     #ffm_data = reader.read(filename_queue)
-    ffm_data = np.fromfile(ffm_path, dtype=np.int32)
+    #ffm_data = np.fromfile(ffm_path, dtype=np.int32)
+    ffm_data = np.loadtxt(ffm_path)
     return ffm_data[:,np.newaxis]
 
