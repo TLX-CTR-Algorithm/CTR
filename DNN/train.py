@@ -153,7 +153,7 @@ def train_model(batch_size=FLAGS.batch_size):
                 vlogits_list = []
                 vpre_list = []
                 vlabels_list = []
-                for step in range(len(valid_inputs) // batch_size):
+                for step in range(math.ceil(len(valid_inputs) / batch_size)):
                     batch_valid_inputs,batch_valid_lables = next(valid_batches)
                     batch_valid_ffm = next(valid_batches2)
                     valid_continous_inputs = batch_valid_inputs[:, 0:FLAGS.encod_cat_index_begin]
