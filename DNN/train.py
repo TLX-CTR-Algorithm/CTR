@@ -124,9 +124,12 @@ def train_model(batch_size=FLAGS.batch_size):
             train_loss = np.mean(train_loss_list)
             train_auc = np.mean(train_auc_list, 0)
             train_accuracy = np.mean(train_accuracy_list)
-            np.savetxt( FLAGS.outlog_dir + '/log/tlogits.log', tlogits_list)
-            np.savetxt( FLAGS.outlog_dir + './log/tpre.log', tpre_list)
-            np.savetxt( FLAGS.outlog_dir + './log/tlabels.log', tlabels_list)
+            tlogits = np.array(tlogits_list).reshape((-1,8))
+            tpre = np.array(tpre_list).reshape((-1))
+            tlabels = np.array(tlabels_list).reshape((-1))
+            np.savetxt( FLAGS.outlog_dir + '/log/tlogits.log', tlogits)
+            np.savetxt( FLAGS.outlog_dir + './log/tpre.log', tpre)
+            np.savetxt( FLAGS.outlog_dir + './log/tlabels.log', tlabels)
 
             logging.debug('----------------------valid-----------------------')
             #使用验证数据，验证模型性能
@@ -169,9 +172,12 @@ def train_model(batch_size=FLAGS.batch_size):
                 valid_loss = np.mean(loss_list)
                 valid_auc = np.mean(auc_list,0)
                 valid_accuracy = np.mean(accuracy_list)
-                np.savetxt( FLAGS.outlog_dir + '/log/vlogits.log', vlogits_list)
-                np.savetxt( FLAGS.outlog_dir + '/log/vpre.log', vpre_list)
-                np.savetxt( FLAGS.outlog_dir + '/log/vlabels.log', vlabels_list)
+                vlogits = np.array(vlabels_list).reshape((-1,8))
+                vpre = np.array(vpre_list).reshape((-1))
+                vlabels = np.array(vlabels_list).reshape((-1))
+                np.savetxt( FLAGS.outlog_dir + '/log/vlogits.log', vlogits)
+                np.savetxt( FLAGS.outlog_dir + '/log/vpre.log', vpre)
+                np.savetxt( FLAGS.outlog_dir + '/log/vlabels.log', vlabels)
                 logging.debug( 'valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, valid_loss, valid_auc, valid_accuracy))
 
             #epoch = (global_step * batch_size) // count_data
