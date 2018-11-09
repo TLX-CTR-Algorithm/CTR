@@ -31,6 +31,7 @@ def parse_args(check=True):
     parser.add_argument('--ffm_train_path',        type=str, default=config.ffm_train_path)
     parser.add_argument('--ffm_valid_path',        type=str, default=config.ffm_valid_path)
     parser.add_argument('--ffm_test_path',         type=str, default=config.ffm_test_path)
+    parser.add_argument('--outlog_dir',            type=str, default=config.outlog_dir)
     #日志显示等级
     parser.add_argument('--debug_level', type=str, default=config.debug_level)
 

@@ -30,6 +30,7 @@ ffm_test_path = os.path.join(BASE_DIR, "output/model_data/test_pred.txt")
 dictsizefile = os.path.join(BASE_DIR, "output/model_data/dictsize.csv")
 model_ouput_dir = os.path.join(BASE_DIR, "DNN/model_output/")
 summary_dir = os.path.join(BASE_DIR, "DNN/summary/")
+outlog_dir = os.path.join(BASE_DIR, "DNN/log/")
 dnn_log_file = 'train_' + time.strftime('%Y%m%d', time.localtime(time.time())) + '.log'
 dnn_log_dir = os.path.join(BASE_DIR, "DNN/log/")
 dnn_log_path = os.path.join(dnn_log_dir, dnn_log_file)
