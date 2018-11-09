@@ -95,7 +95,8 @@ def train_model(batch_size=FLAGS.batch_size):
             tlogits_list = []
             tpre_list = []
             tlabels_list = []
-            for step in range(len(inputs) // batch_size):
+            debug_argv1 = range(len(inputs) // batch_size)
+            for step in range( math.ceil( len(inputs) / batch_size ) ):
                 batch_inputs,batch_lables = next(batches)
                 batch_ffm = next(batches2)
                 continous_inputs = batch_inputs[:, 0:FLAGS.encod_cat_index_begin]
@@ -127,9 +128,9 @@ def train_model(batch_size=FLAGS.batch_size):
             tlogits = np.array(tlogits_list).reshape((-1,8))
             tpre = np.array(tpre_list).reshape((-1))
             tlabels = np.array(tlabels_list).reshape((-1))
-            np.savetxt( FLAGS.outlog_dir + '/log/tlogits.log', tlogits)
-            np.savetxt( FLAGS.outlog_dir + '/log/tpre.log', tpre)
-            np.savetxt( FLAGS.outlog_dir + '/log/tlabels.log', tlabels)
+            np.savetxt( FLAGS.outlog_dir + '/tlogits.log', tlogits)
+            np.savetxt( FLAGS.outlog_dir + '/tpre.log', tpre)
+            np.savetxt( FLAGS.outlog_dir + '/tlabels.log', tlabels)
 
             logging.debug('----------------------valid-----------------------')
             #使用验证数据，验证模型性能
@@ -175,9 +176,9 @@ def train_model(batch_size=FLAGS.batch_size):
                 vlogits = np.array(vlabels_list).reshape((-1,8))
                 vpre = np.array(vpre_list).reshape((-1))
                 vlabels = np.array(vlabels_list).reshape((-1))
-                np.savetxt( FLAGS.outlog_dir + '/log/vlogits.log', vlogits)
-                np.savetxt( FLAGS.outlog_dir + '/log/vpre.log', vpre)
-                np.savetxt( FLAGS.outlog_dir + '/log/vlabels.log', vlabels)
+                np.savetxt( FLAGS.outlog_dir + '/vlogits.log', vlogits)
+                np.savetxt( FLAGS.outlog_dir + '/vpre.log', vpre)
+                np.savetxt( FLAGS.outlog_dir + '/vlabels.log', vlabels)
                 logging.debug( 'valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, valid_loss, valid_auc, valid_accuracy))
 
             #epoch = (global_step * batch_size) // count_data
