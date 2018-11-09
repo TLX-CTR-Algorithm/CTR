@@ -128,8 +128,8 @@ def train_model(batch_size=FLAGS.batch_size):
             tpre = np.array(tpre_list).reshape((-1))
             tlabels = np.array(tlabels_list).reshape((-1))
             np.savetxt( FLAGS.outlog_dir + '/log/tlogits.log', tlogits)
-            np.savetxt( FLAGS.outlog_dir + './log/tpre.log', tpre)
-            np.savetxt( FLAGS.outlog_dir + './log/tlabels.log', tlabels)
+            np.savetxt( FLAGS.outlog_dir + '/log/tpre.log', tpre)
+            np.savetxt( FLAGS.outlog_dir + '/log/tlabels.log', tlabels)
 
             logging.debug('----------------------valid-----------------------')
             #使用验证数据，验证模型性能
