@@ -5,22 +5,19 @@ import datetime
 import os
 import sys
 import random
-import hashlib
 import csv
+import config_path
 from utils import *
 
-continous_features = range(1, 5)
-categorial_features = range(5, 31)
-continous_clip = [21356, 9789, 557, 51]
 
 
-def create_feature(data_path, datadir, filename=None):
+def create_feature(data_path, datadir, is_train, filename=None):
     '''
     构建新特征，生成数据集
     data_path:采样后数据位置
     datadir:生成数据存储位置
     '''
-    if filename == 'dnsp_train.csv':
+    if filename == 'train.csv':
         data_df = pd.read_csv(data_path + filename)
     else:
         filename = 'test.csv'
@@ -28,14 +25,20 @@ def create_feature(data_path, datadir, filename=None):
     print("finished loading raw data, ", filename, data_df.shape)
 
     data_df['user'] = gen_userid(data=data_df)
-    device_id_cnt, device_ip_cnt, user_cnt, user_hour_cnt = scan(
-        data_path + filename)
+    device_id_cnt, device_ip_cnt, user_cnt, user_hour_cnt, id_cnt_1,ip_cnt_1 = scan(data_path + filename, is_train)
+
 
     data_df['user_count'] = data_df['user'].map(user_cnt)
     data_df['user_hour'] = data_df['user'] + '-' + data_df['hour'].map(str)
     data_df['smooth_user_hour_count'] = data_df['user_hour'].map(user_hour_cnt)
     data_df['device_id_count'] = data_df['device_id'].map(device_id_cnt)
     data_df['device_ip_count'] = data_df['device_ip'].map(device_ip_cnt)
+    if is_train:
+        data_df['device_id_rate'] = (data_df['device_id'].map(id_cnt_1))/data_df['device_id_count']
+        data_df['device_ip_rate'] = (data_df['device_ip'].map(ip_cnt_1))/data_df['device_ip_count']
+    else:
+        data_df['device_id_rate'] = 0
+        data_df['device_ip_rate'] = 0
     data_df['day'] = np.round(data_df.hour %
                               10000 / 100).astype('int')  # 生成日期，某天
     data_df['hour_n'] = np.round(data_df.hour % 100)  # 抽取单位时
@@ -53,23 +56,30 @@ def create_feature(data_path, datadir, filename=None):
 
     print("finished creating feature, ", filename, data_df.shape)
 
-    vn_list = ['click', 'device_id_count', 'device_ip_count', 'user_count',
-               'smooth_user_hour_count', 'C1', 'C14', 'C17', 'C18', 'C19',
-               'C21', 'app_category', 'app_domain', 'app_id', 'banner_pos',
-               'device_conn_type', 'device_id', 'device_ip', 'device_model',
-               'device_type', 'site_category', 'site_domain', 'site_id', 'day',
-               'hour_n', 'weekday', 'app_or_web', 'C15_C16', 'pub_id',
-               'pub_domain', 'pub_category']
+    vn_list = ['click', 'device_id_rate','device_ip_rate','device_id_count',
+                'device_ip_count', 'user_count','smooth_user_hour_count',
+                'C1', 'C14', 'C17', 'C18', 'C19','C21', 'app_category',
+                'app_domain', 'banner_pos','device_conn_type','device_id',
+                'device_ip', 'device_model','device_type', 'site_category',
+                 'site_domain', 'day','hour_n', 'weekday', 'app_or_web',
+                 'C15_C16', 'pub_id','pub_domain', 'pub_category']
 
-    if filename == 'dnsp_train.csv':
+    if filename == 'train.csv':
         data_df = data_df.loc[:, vn_list]
-        data_df.to_csv(datadir + 'fe_add_train_data.csv', index=None, header=0)
-        print('fe_add_train_data.csv is in ' + datadir)
+        data_df.to_csv(datadir + 'fe_add_train_data.csv', index=None,header = 0)
+        print('fe_add_train_data.csv is in ' + datadir,data_df.shape)
+        del data_df
     else:
         vn_list.remove('click')
         data_df = data_df.loc[:, vn_list]
-        data_df.to_csv(datadir + 'fe_add_test_data.csv', index=None, header=0)
-        print('fe_add_test_data.csv is in ' + datadir)
+        data_df.to_csv(datadir + 'fe_add_test_data.csv', index=None,header = 0)
+        print('fe_add_test_data.csv is in ' + datadir,data_df.shape)
+        del data_df
+  
+       
+
+continous_features = range(1, 7)
+categorial_features = range(7, 31)
 
 
 
@@ -78,10 +88,11 @@ class ContinuousFeatureGenerator:
     Normalize the integer features to [0, 1] by min-max normalization
     """
 
-    def __init__(self, num_feature):  # 初始化，与传入特征长度一致的列表，用来存放最大最小值
+    def __init__(self, num_feature,continous_clip):  # 初始化，与传入特征长度一致的列表，用来存放最大最小值
         self.num_feature = num_feature
         self.min = [sys.maxsize] * num_feature
         self.max = [-sys.maxsize] * num_feature
+        self.continous_clip = continous_clip
 
     def build(self, datafile, continous_features):
         with open(datafile, 'r') as f:
@@ -89,20 +100,28 @@ class ContinuousFeatureGenerator:
                 features = line.rstrip('\n').split(',')  # 从文本中抽取数据，并根据分隔符分开
                 for i in range(0, self.num_feature):  # 估计是除去首列id列，循环处理前面13个连续特征
                     val = features[continous_features[i]]  # 该行i对应的特征的值
-                    if val != '':
-                        val = int(val)  # 向下取整
-                        # 若大于分割点，则以分割点为值，也就是去除异常值，超过95%为异常点
-                        if val > continous_clip[i]:
-                            val = continous_clip[i]
-                        # 与该位置的值比较，取较小值，找出该位置的最小值
-                        self.min[i] = min(self.min[i], val)
-                        # 与该位置的值比较，取较大值，找出该位置的最大值
-                        self.max[i] = max(self.max[i], val)
+                    if i>1:
+                        if val != '':
+                            val = int(val)  # 向下取整
+                            # 若大于分割点，则以分割点为值，也就是去除异常值，超过95%为异常点
+                            if val > self.continous_clip[i]:
+                                val = self.continous_clip[i]
+                            # 与该位置的值比较，取较小值，找出该位置的最小值
+                            self.min[i] = min(self.min[i], val)
+                            # 与该位置的值比较，取较大值，找出该位置的最大值
+                            self.max[i] = max(self.max[i], val)
+                    else:
+                        self.min[i] = 0
+                        self.max[i] = 1
 
     def gen(self, idx, val):  # val为值，idx是连续型变量的位置，从0开始
         if val == '':
             return 0.0
         val = float(val)
+        if idx > 1:
+            if val > self.continous_clip[idx]:
+                val = self.continous_clip[idx]
+            
         # 对应位置做最大最小化
         return (val - self.min[idx]) / (self.max[idx] - self.min[idx])
 
@@ -118,9 +137,9 @@ class CategoryDictGenerator:
         self.num_feature = num_feature  # 类别型特征的数目
         for i in range(0, num_feature):  # 列表中元素依次为对应位置的特征及计数的字典
             self.dicts.append(collections.defaultdict(int))
-	# 获取分类型特征的符合cutoff条件的特征值的名称，且是降序的
+    # 获取分类型特征的符合cutoff条件的特征值的名称，且是降序的
 
-    def build(self, datafile, categorial_features, cutoff=0):  # categorial_features序列，cutoff切割点,传入
+    def build(self, datafile, categorial_features, cutoff=25):  # categorial_features序列，cutoff切割点,传入
         with open(datafile, 'r') as f:
             for line in f:
                 features = line.rstrip('\n').split(',')
@@ -128,13 +147,15 @@ class CategoryDictGenerator:
                     if features[categorial_features[i]] != '':  # 对应位置的特征的值
                         # 该值对应字典的值加1，计数，字典里统计各种特征值的计数
                         self.dicts[i][features[categorial_features[i]]] += 1
+            
         for i in range(0, self.num_feature):
             self.dicts[i] = filter(lambda x: x[1] >= cutoff,
                                    self.dicts[i].items())  # 根据分割点保留符合条件的特征值对，将新的字典放回
-
+            
             self.dicts[i] = sorted(
                 self.dicts[i], key=lambda x: (-x[1], x[0]))  # 字典按值降序排列，放回列表
             # 将特征值与对应计数分开成两个，对应的元组，前面是特征值，后面是计数
+            
             vocabs, _ = list(zip(*self.dicts[i]))
             # 新字典，键是特征值，值是序号？放回列表
             self.dicts[i] = dict(zip(vocabs, range(1, len(vocabs) + 1)))
@@ -151,12 +172,12 @@ class CategoryDictGenerator:
         return list(map(len, self.dicts))
 
 
-def preprocess(datadir, outdir, continous_features, categorial_features):  # 预处理
+def preprocess(datadir, outdir, continous_features, categorial_features,continous_clip):  # 预处理
     """
     分割数据集，用于ffm,GBDT,fcn
     """
 
-    dists = ContinuousFeatureGenerator(len(continous_features))
+    dists = ContinuousFeatureGenerator(len(continous_features),continous_clip)
     dists.build(os.path.join(datadir, 'fe_add_train_data.csv'),
                 continous_features)  # 得到了最大最小值
 

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import os
 
 '''
@@ -16,8 +15,6 @@ field2count = os.path.join(BASE_DIR, "avazu_CTR/field2count/")
 
 
 print(test_path)
-# =======
-import os
 
 '''
 模型的基本配置 
