@@ -95,7 +95,6 @@ def train_model(batch_size=FLAGS.batch_size):
             tlogits_list = []
             tpre_list = []
             tlabels_list = []
-            debug_argv1 = range(len(inputs) // batch_size)
             for step in range( math.ceil( len(inputs) / batch_size ) ):
                 batch_inputs,batch_lables = next(batches)
                 batch_ffm = next(batches2)
@@ -108,9 +107,9 @@ def train_model(batch_size=FLAGS.batch_size):
                 train_loss_list.append(loss)
                 train_auc_list.append(auc[0])
                 train_accuracy_list.append(accuracy)
-                tlogits_list.append(end_points['logits'])
-                tpre_list.append(end_points['prediction'])
-                tlabels_list.append(labels)
+                #tlogits_list.extend(end_points['logits'])
+                tpre_list.extend(end_points['prediction'])
+                tlabels_list.extend(labels)
                 if global_step % FLAGS.logfrequency == 0:
                     #每间隔指定的频率打印日志并存储checkpoint文件
                     logging.debug('train: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
@@ -126,8 +125,8 @@ def train_model(batch_size=FLAGS.batch_size):
             train_auc = np.mean(train_auc_list, 0)
             train_accuracy = np.mean(train_accuracy_list)
             #tlogits = np.array(tlogits_list).reshape((-1,8))
-            tpre = np.array(tpre_list).reshape((-1))
-            tlabels = np.array(tlabels_list).reshape((-1))
+            tpre = np.array(tpre_list)
+            tlabels = np.array(tlabels_list)
             #np.savetxt( FLAGS.outlog_dir + '/tlogits.log', tlogits)
             np.savetxt( FLAGS.outlog_dir + '/tpre.log', tpre)
             np.savetxt( FLAGS.outlog_dir + '/tlabels.log', tlabels)
@@ -164,9 +163,9 @@ def train_model(batch_size=FLAGS.batch_size):
                     loss_list.append(loss)
                     auc_list.append(auc[0])
                     accuracy_list.append(accuracy)
-                    vlogits_list.append(end_points['logits'])
-                    vpre_list.append(end_points['prediction'])
-                    vlabels_list.append(labels)
+                    #vlogits_list.extend(end_points['logits'])
+                    vpre_list.extend(end_points['prediction'])
+                    vlabels_list.extend(labels)
                     #if step % FLAGS.logfrequency == 0:
                         #每间隔指定的频率打印日志并存储checkpoint文件
                      #   logging.info('valid: step [{0}] loss [{1}] auc [{2}] accuracy [{3}]'.format(global_step, loss, auc, accuracy))
@@ -174,8 +173,8 @@ def train_model(batch_size=FLAGS.batch_size):
                 valid_auc = np.mean(auc_list,0)
                 valid_accuracy = np.mean(accuracy_list)
                 #vlogits = np.array(vlabels_list).reshape((-1,8))
-                vpre = np.array(vpre_list).reshape((-1))
-                vlabels = np.array(vlabels_list).reshape((-1))
+                vpre = np.array(vpre_list)
+                vlabels = np.array(vlabels_list)
                 #np.savetxt( FLAGS.outlog_dir + '/vlogits.log', vlogits)
                 np.savetxt( FLAGS.outlog_dir + '/vpre.log', vpre)
                 np.savetxt( FLAGS.outlog_dir + '/vlabels.log', vlabels)
