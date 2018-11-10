@@ -2,3 +2,6 @@
 .idea/*
 __pycache__
 avazu_CTR/*
+output/*
+DNN/log/*
+DNN/model_output/*

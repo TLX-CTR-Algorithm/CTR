@@ -3,24 +3,25 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+from DNN import flags
 import tensorflow as tf
-import config
 
 slim = tf.contrib.slim
-
+FLAGS, unparsed = flags.parse_args()
 
 # 实现模型的构建以及损失函数交叉熵的计算
 class Model():
-    def __init__(self, learning_rate, oridata_dim, embed_max):
+    def __init__(self, learning_rate, oridata_dim, embed_max, embed_dim=128, decay_steps=5000, decay_rate=0.96):
         self.learning_rate = learning_rate
-        self.layers = [6, 6, 6]
+        self.layers = [6, 6, 3]
         self.oridata_dim = oridata_dim
-        self.embed_dim = config.embed_dim
+        self.embed_dim = embed_dim
         self.embed_max = embed_max
         self.growth = 128
         self.outunits = 2048
         self.outrate = 0.5
+        self.decay_steps = decay_steps
+        self.decay_rate = decay_rate
 
     def embeding(self, embed_inputs):
         with tf.name_scope("embedding"):
@@ -172,7 +173,7 @@ class Model():
 
     def build(self):
         self.default_inputs_size = 2048
-        self.continous_inputs = tf.placeholder(tf.float32, [None,4], name='continous_inputs')
+        self.continous_inputs = tf.placeholder(tf.float32, [None,FLAGS.encod_cat_index_begin], name='continous_inputs')
         self.categorial_inputs = tf.placeholder(tf.float32, name='categorial_inputs')
         self.label = tf.placeholder(tf.float32, name='label')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
@@ -181,15 +182,18 @@ class Model():
         with tf.variable_scope('builddensenet'):
             self.logits, self.end_points = self.densenet(self.continous_inputs, self.categorial_inputs, dropout_keep_prob=self.keep_prob)
             self.log_loss = tf.losses.log_loss(labels=self.label, predictions=self.end_points['prediction'])
+            #self.loss = self.log_loss
             self.loss = tf.reduce_mean(self.log_loss)
 
-        optimizer = tf.train.FtrlOptimizer(self.learning_rate)
+        step_learning_rate = tf.train.exponential_decay(self.learning_rate, self.global_step, self.decay_steps, self.decay_rate, staircase=True, name='step_learning_rate')
+        optimizer = tf.train.FtrlOptimizer(step_learning_rate)
         self.gradients = optimizer.compute_gradients(self.loss)
         self.train_step = optimizer.apply_gradients(self.gradients, global_step=self.global_step)
 
         with tf.name_scope("score"):
             correct_prediction = tf.equal(tf.to_float(self.end_points['prediction'] > 0.5), self.label)
             self.accuracy = tf.reduce_mean(tf.to_float(correct_prediction), name="accuracy")
+        self.auc = tf.metrics.auc(labels=self.label, predictions=self.end_points['prediction'])
 
         #summaries
         grad_summaries = []
