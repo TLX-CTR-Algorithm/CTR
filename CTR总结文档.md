@@ -911,7 +911,7 @@ def scan(path, is_trian):
 
 ## 4 Kaggle成果
 
-
+![kaggle_score](https://github.com/TLX-CTR-Algorithm/CTR/blob/develop/kaggle_score.jpg)
 
 ## 5 心得体会
 
