@@ -686,8 +686,10 @@ def scan(path, is_trian):
 
 ![DeepFM](https://github.com/TLX-CTR-Algorithm/CTR/blob/develop/Discuss_file/DeepFM.png)
 
-[论⽂地址][https://arxiv.org/pdf/1606.07792v1.pdf]
-这是我们从arxiv上找的关于DeepFM的paper-Wide & Deep Learning for Recommender Systems
+[论⽂地址](https://arxiv.org/pdf/1606.07792v1.pdf) 
+
+这是我们从arxiv上找的关于DeepFM的paper-Wide & Deep Learning for Recommender Systems 
+
 这是我们DeepFM跑的[数据](https://github.com/TLX-CTR-Algorithm/CTR/wiki/CTR-DNN%E7%BD%91%E7%BB%9C%E9%83%A8%E5%88%86)
 
 #### 3.1.3 FwFMs
