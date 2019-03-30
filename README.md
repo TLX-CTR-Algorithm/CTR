@@ -1,4 +1,5 @@
- ### CTR 项目 
+<a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg"></a>
+### CTR 项目 
   - 进度表格 https://docs.google.com/spreadsheets/d/16YCAzNXSQbsv2fYImSNjDsKKO8uQhPWXi8JTEJpA5uA/edit#gid=0
   - kaggle https://www.kaggle.com/c/avazu-ctr-prediction/leaderboard
   - 项目地址 https://github.com/TLX-CTR-Algorithm/CTR/tree/develop
